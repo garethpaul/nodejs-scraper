@@ -1,5 +1,8 @@
 # node-scraper
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 A little module that makes scraping websites a little easier. Uses node.js and jQuery.
 
 ## Installation
@@ -69,8 +72,6 @@ First argument is an array containing either strings or objects, second is a cal
             'reqPerSec': 0.2 // Wait 5sec between each external request
         }
     );
-
-
 
 ## Arguments
 
