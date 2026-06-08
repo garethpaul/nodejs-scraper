@@ -39,7 +39,6 @@ Canonical security policy and reporting:
 
 - [`SECURITY.md`](SECURITY.md)
 
-
 Scraping can overload sites or collect sensitive data. Users should respect
 robots, terms, and rate limits. The library should not hide target URLs,
 credentials, or request behavior from callers.
