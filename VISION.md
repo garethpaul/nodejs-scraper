@@ -21,11 +21,12 @@ Priority:
 - Keep rate-limiting behavior visible in examples
 - Avoid encouraging aggressive scraping or bypassing site rules
 - Maintain package metadata and examples
+- Keep no-network tests for request options and network errors
 
 Next priorities:
 
 - Document Node version and legacy dependency constraints
-- Add tests around callback behavior, request errors, and parallel throttling
+- Add tests around callback ordering and parallel throttling
 - Modernize request/jsdom dependencies in a dedicated pass
 - Clarify robots, terms, and rate-limit expectations for users
 

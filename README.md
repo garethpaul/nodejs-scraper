@@ -5,7 +5,8 @@
 
 ## Overview
 
-`garethpaul/nodejs-scraper` is a Node.js or JavaScript project. NodeJS Screen Scraper
+`garethpaul/nodejs-scraper` is a legacy Node.js scraping helper that fetches
+pages and exposes a jQuery-like document interface.
 
 This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: JavaScript (5).
 
@@ -13,10 +14,15 @@ This README is based on the checked-in source, manifests, scripts, and repositor
 
 - `README.md` - project overview and local usage notes
 - `package.json` - JavaScript dependency and script metadata
+- `CHANGES.md` - baseline change log
+- `Makefile` - local verification entry point
 - `examples` - source or example code
 - `lib` - source or example code
 - `SECURITY.md` - security reporting and disclosure guidance
 - `VISION.md` - project direction and maintenance guardrails
+- `docs/plans/2026-06-08-scraper-baseline.md` - completed hardening plan
+- `scripts/check-baseline.py` - static baseline checks used by `npm run check`
+- `test/scraper.test.js` - no-network behavior tests
 
 Additional scan context:
 
@@ -44,26 +50,38 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Running or Using the Project
 
-- Inspect `package.json` for available npm scripts before running the project.
+- Import `scraper` from `lib/scraper.js` or use the package entry point.
+- Pass a URL string, request options object, or array of either form.
+- Use `reqPerSec` when issuing multiple external requests so callers do not
+  overwhelm target services.
 
 ## Testing and Verification
 
-- No dedicated automated test command was identified from the checked-in files. Verify changes by running the relevant build or manually exercising the sample.
+- `npm test`
+- `npm run check`
+- `make check`
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
 ## Configuration and Secrets
 
-- Detected references to Twitter. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
+- No required secret or credential file was identified in the repository scan.
+- Keep credentials, private target URLs, captured pages, and environment files
+  out of git.
 
 ## Security and Privacy Notes
 
 - Review changes touching external API calls or credential-adjacent configuration; examples from the scan include examples/advanced.js, examples/parallel.js, examples/simple.js.
 - Review changes touching network requests, sockets, or service endpoints; examples from the scan include examples/advanced.js, examples/parallel.js, examples/simple.js, examples/test.js, and 1 more.
+- Tests should avoid external requests by injecting fake request/jsdom
+  dependencies. Network errors should be surfaced to callbacks without reading
+  missing response bodies.
 
 ## Maintenance Notes
 
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
+- Run `npm run check` before changing scraper behavior, request handling, or
+  examples.
 - See `VISION.md` for project direction and contribution guardrails.
 
 ## Contributing

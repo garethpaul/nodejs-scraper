@@ -6,6 +6,10 @@
   "engines" : ["node"],
   "directories" : { "lib" : "./lib" },
   "main" : "./lib/scraper",
+  "scripts" : {
+    "test" : "node test/scraper.test.js",
+    "check" : "npm test && python3 scripts/check-baseline.py"
+  },
   "repository" : { "type":"git", "url":"https://github.com/mape/node-scraper.git" },
   "dependencies" : {
     "request" : ">=0.10.0",
