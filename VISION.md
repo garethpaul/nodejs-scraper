@@ -39,7 +39,7 @@ Scraping can overload sites or collect sensitive data. Users should respect
 robots, terms, and rate limits. The library should not hide target URLs,
 credentials, or request behavior from callers.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Anti-detection or bypass features
 - Aggressive default concurrency
