@@ -1,5 +1,8 @@
 # nodejs-scraper
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 ## Overview
 
 `garethpaul/nodejs-scraper` is a Node.js or JavaScript project. NodeJS Screen Scraper
@@ -72,4 +75,3 @@ Keep changes small and tied to the project that is already present in this repos
 Prior README summary:
 
 > node-scraper <!-- README-OVERVIEW-IMAGE --> A little module that makes scraping websites a little easier. Uses node.js and jQuery. Installation Via [npm](http://github.com/isaacs/npm): $ npm install scraper Examples Simple
-
