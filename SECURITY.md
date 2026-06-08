@@ -41,10 +41,16 @@ For this scraper, also review whether external requests respect target terms,
 robots guidance, and caller-provided rate limits. Tests should inject fake
 request clients instead of contacting live sites, and network errors should
 reach callbacks without exposing or logging captured page content.
+The checked-in examples use reserved `example.test` URLs so casual test runs do
+not send traffic to retired third-party endpoints.
 
 ## Dependency and Supply Chain Security
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
+
+The current manifest pins a legacy `request/jsdom` API contract for
+deterministic maintenance. Modernizing either package should be treated as a
+security-sensitive compatibility change and verified with `npm run check`.
 
 ## Safe Research Guidelines
 

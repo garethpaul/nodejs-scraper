@@ -47,11 +47,16 @@ npm install
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
+This package intentionally pins a legacy `request/jsdom` pair because the
+current scraper API depends on old jsdom helpers. Treat `npm install` as a
+legacy-runtime workflow until the jsdom integration is modernized.
 
 ## Running or Using the Project
 
 - Import `scraper` from `lib/scraper.js` or use the package entry point.
 - Pass a URL string, request options object, or array of either form.
+- The checked-in external examples use reserved `example.test` URLs; replace
+  them with targets you own or have permission to test.
 - Use `reqPerSec` when issuing multiple external requests so callers do not
   overwhelm target services.
 
@@ -76,12 +81,16 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Tests should avoid external requests by injecting fake request/jsdom
   dependencies. Network errors should be surfaced to callbacks without reading
   missing response bodies.
+- Scraping workflows should respect robots guidance, terms of service, and
+  rate limits.
 
 ## Maintenance Notes
 
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - Run `npm run check` before changing scraper behavior, request handling, or
   examples.
+- Keep `request/jsdom` changes explicit and tested because modern jsdom removed
+  the APIs used by this package.
 - See `VISION.md` for project direction and contribution guardrails.
 
 ## Contributing

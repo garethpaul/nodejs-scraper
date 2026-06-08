@@ -22,6 +22,10 @@ HTML through a jQuery-like jsdom wrapper.
 - Normalized request options without mutating caller objects.
 - Returned immediately after missing URI and request error callbacks.
 - Added no-network Node tests plus a Python static baseline checker.
+- Replaced retired Twitter Search examples with reserved `example.test`
+  placeholders.
+- Pinned the legacy `request/jsdom` dependency contract for deterministic
+  maintenance checks.
 
 ## Verification
 

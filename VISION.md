@@ -19,8 +19,9 @@ Priority:
 
 - Preserve the URL/request-object/array input API
 - Keep rate-limiting behavior visible in examples
+- Keep external examples on reserved `example.test` placeholders
 - Avoid encouraging aggressive scraping or bypassing site rules
-- Maintain package metadata and examples
+- Maintain package metadata and the pinned legacy `request/jsdom` contract
 - Keep no-network tests for request options and network errors
 
 Next priorities:

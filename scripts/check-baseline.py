@@ -38,6 +38,11 @@ def main():
         failures.append("package.json must expose npm test")
     if "scripts/check-baseline.py" not in scripts.get("check", ""):
         failures.append("package.json must expose npm run check")
+    dependencies = package.get("dependencies", {})
+    if dependencies.get("request") != "2.88.2":
+        failures.append("package.json must pin request to the documented legacy version")
+    if dependencies.get("jsdom") != "0.2.19":
+        failures.append("package.json must pin jsdom to the documented legacy API version")
 
     source = read("lib/scraper.js")
     for phrase in [
@@ -66,13 +71,27 @@ def main():
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
 
+    for path in ["examples/simple.js", "examples/advanced.js", "examples/parallel.js"]:
+        example = read(path)
+        if "search.twitter.com" in example:
+            failures.append(f"{path} must not point at the retired Twitter search endpoint")
+        if "https://example.test/" not in example:
+            failures.append(f"{path} must use reserved example.test URLs")
+
     gitignore = read(".gitignore")
     for expected in ["node_modules/", "npm-debug.log", ".env"]:
         if expected not in gitignore:
             failures.append(f".gitignore must include {expected}")
 
     docs = "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md"])
-    for phrase in ["npm run check", "external requests", "network errors"]:
+    for phrase in [
+        "npm run check",
+        "external requests",
+        "network errors",
+        "request/jsdom",
+        "example.test",
+        "rate limits",
+    ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
 

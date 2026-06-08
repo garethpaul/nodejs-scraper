@@ -9,3 +9,7 @@
 - Added `npm test`, `npm run check`, `make check`, and static baseline checks.
 - Documented no-network test expectations, external request handling, and
   network error behavior.
+- Replaced retired Twitter Search example URLs with reserved `example.test`
+  placeholders.
+- Pinned the legacy `request/jsdom` dependency contract so installs do not
+  silently float to incompatible package APIs.
