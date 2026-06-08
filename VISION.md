@@ -23,6 +23,7 @@ Priority:
 - Avoid encouraging aggressive scraping or bypassing site rules
 - Maintain package metadata and the pinned legacy `request/jsdom` contract
 - Keep no-network tests for request options and network errors
+- Keep examples bounded and runnable from the repository checkout
 
 Next priorities:
 

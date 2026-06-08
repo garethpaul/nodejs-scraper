@@ -3,9 +3,9 @@
   "description" : "Easier web scraping using jQuery.",
   "version" : "0.0.9",
   "author" : "Mathias Pettersson <mape@mape.me>",
-  "engines" : ["node"],
+  "engines" : { "node" : ">=6" },
   "directories" : { "lib" : "./lib" },
-  "main" : "./lib/scraper",
+  "main" : "./lib/scraper.js",
   "scripts" : {
     "test" : "node test/scraper.test.js",
     "check" : "npm test && python3 scripts/check-baseline.py"

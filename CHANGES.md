@@ -13,3 +13,7 @@
   placeholders.
 - Pinned the legacy `request/jsdom` dependency contract so installs do not
   silently float to incompatible package APIs.
+- Matched package engine metadata to the pinned `request` dependency.
+- Made examples import `../lib/scraper`, bounded the localhost load example,
+  and closed its server after callbacks.
+- Added queue coverage so concurrent fetches cannot silently skip items.

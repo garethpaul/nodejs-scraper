@@ -13,6 +13,10 @@ HTML through a jQuery-like jsdom wrapper.
   present, which could throw before the caller received the real network error.
 - Missing URI errors still fell through to the request client.
 - Applying defaults mutated caller-provided request option objects.
+- Dependency ranges allowed modern incompatible request/jsdom installs.
+- Examples referenced the retired Twitter search endpoint.
+- The local load example issued too many requests by default and did not close
+  its server.
 - There was no local test or static-check command.
 
 ## Work Completed
@@ -26,6 +30,8 @@ HTML through a jQuery-like jsdom wrapper.
   placeholders.
 - Pinned the legacy `request/jsdom` dependency contract for deterministic
   maintenance checks.
+- Matched engine metadata to the pinned `request` package, made examples import
+  the local scraper, bounded localhost load, and added queue coverage.
 
 ## Verification
 

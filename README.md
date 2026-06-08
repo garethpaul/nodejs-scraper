@@ -44,12 +44,14 @@ Additional scan context:
 git clone https://github.com/garethpaul/nodejs-scraper.git
 cd nodejs-scraper
 npm install
+npm run check
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 This package intentionally pins a legacy `request/jsdom` pair because the
 current scraper API depends on old jsdom helpers. Treat `npm install` as a
 legacy-runtime workflow until the jsdom integration is modernized.
+The manifest declares `node >=6` to match the pinned `request` package.
 
 ## Running or Using the Project
 
@@ -57,6 +59,7 @@ legacy-runtime workflow until the jsdom integration is modernized.
 - Pass a URL string, request options object, or array of either form.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
+- Example scripts import `../lib/scraper` so they can run from this checkout.
 - Use `reqPerSec` when issuing multiple external requests so callers do not
   overwhelm target services.
 

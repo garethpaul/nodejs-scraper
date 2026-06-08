@@ -1,4 +1,4 @@
-var scraper = require('scraper');
+var scraper = require('../lib/scraper');
 
 scraper({
 	'uri': 'https://example.test/search?q=nodejs'
@@ -8,7 +8,5 @@ scraper({
 	, function(err, $) {
 	if (err) {throw err;}
 
-	$('.msg').each(function() {
-		console.log($(this).text().trim()+'\n');
-	});
+	console.log($('title').text().trim());
 });

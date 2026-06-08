@@ -38,6 +38,10 @@ def main():
         failures.append("package.json must expose npm test")
     if "scripts/check-baseline.py" not in scripts.get("check", ""):
         failures.append("package.json must expose npm run check")
+    if package.get("main") != "./lib/scraper.js":
+        failures.append("package.json main must point at ./lib/scraper.js")
+    if package.get("engines") != {"node": ">=6"}:
+        failures.append("package.json must match the pinned request engine baseline")
     dependencies = package.get("dependencies", {})
     if dependencies.get("request") != "2.88.2":
         failures.append("package.json must pin request to the documented legacy version")
@@ -67,16 +71,23 @@ def main():
         "reports missing uri",
         "handles request errors",
         "handles non-200 responses",
+        "does not skip queued requests",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
 
     for path in ["examples/simple.js", "examples/advanced.js", "examples/parallel.js"]:
         example = read(path)
+        if "require('../lib/scraper')" not in example:
+            failures.append(f"{path} must import the local scraper")
         if "search.twitter.com" in example:
             failures.append(f"{path} must not point at the retired Twitter search endpoint")
         if "https://example.test/" not in example:
             failures.append(f"{path} must use reserved example.test URLs")
+
+    local_example = read("examples/test.js")
+    if "SCRAPER_TEST_REQUESTS" not in local_example or "server.close()" not in local_example:
+        failures.append("examples/test.js must bound local load and close its server")
 
     gitignore = read(".gitignore")
     for expected in ["node_modules/", "npm-debug.log", ".env"]:

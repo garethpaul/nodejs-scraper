@@ -46,22 +46,34 @@ function scraperWithRequest(fakeRequest) {
 				};
 			},
 			jQueryify: function(window, path, callback) {
-				callback(window, function() {});
+				callback(window, function() {
+					return {
+						append: function() { return this; },
+						find: function() {
+							return {
+								html: function() { return ''; }
+							};
+						},
+						html: function() { return ''; },
+						text: function() { return 'Example Domain'; },
+						length: 1
+					};
+				});
 			}
 		}
 	});
 }
 
 test('normalizes string request options', function(done) {
-	var options = scraperModule.normalizeRequestOptions('http://example.com');
+	var options = scraperModule.normalizeRequestOptions('https://example.com');
 
-	assert.equal(options.uri, 'http://example.com');
+	assert.equal(options.uri, 'https://example.com');
 	assert.equal(options.headers['User-Agent'], 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)');
 	done();
 });
 
 test('does not mutate request options', function(done) {
-	var original = { uri: 'http://example.com', headers: { Accept: 'text/html' } };
+	var original = { uri: 'https://example.com', headers: { Accept: 'text/html' } };
 	var normalized = scraperModule.normalizeRequestOptions(original);
 
 	assert.equal(original.headers['User-Agent'], undefined);
@@ -90,7 +102,7 @@ test('handles request errors without reading body', function(done) {
 		});
 	});
 
-	scraper('http://example.com', function(err) {
+	scraper('https://example.com', function(err) {
 		assert(err);
 		assert.equal(err.message, 'network failed');
 		done();
@@ -104,10 +116,30 @@ test('handles non-200 responses without reading body', function(done) {
 		});
 	});
 
-	scraper('http://example.com', function(err) {
+	scraper('https://example.com', function(err) {
 		assert(err);
 		assert(err.message.indexOf('503') !== -1);
 		done();
+	});
+});
+
+test('does not skip queued requests', function(done) {
+	var calledUris = [];
+	var callbackCount = 0;
+	var scraper = scraperWithRequest(function(options, callback) {
+		calledUris.push(options.uri);
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><head></head><body></body></html>');
+		});
+	});
+
+	scraper(['https://a.example', 'https://b.example', 'https://c.example'], function(err) {
+		assert.ifError(err);
+		callbackCount += 1;
+		if (callbackCount === 3) {
+			assert.deepEqual(calledUris, ['https://a.example', 'https://b.example', 'https://c.example']);
+			done();
+		}
 	});
 });
 
