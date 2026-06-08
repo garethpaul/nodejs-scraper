@@ -1,5 +1,8 @@
 ## NodeJS Scraper Vision
 
+This document explains the current state and direction of the project.
+Project overview and developer docs: [`README.md`](README.md)
+
 NodeJS Scraper is a Node module that makes website scraping easier by wrapping
 request fetching with a jQuery-like document interface.
 
