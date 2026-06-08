@@ -45,3 +45,6 @@ credentials, or request behavior from callers.
 - Aggressive default concurrency
 - Credential capture or hidden telemetry
 - Dependency rewrites without compatibility notes
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
