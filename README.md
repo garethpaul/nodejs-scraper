@@ -1,121 +1,75 @@
-# node-scraper
+# nodejs-scraper
 
-<!-- README-OVERVIEW-IMAGE -->
-![Project overview](docs/readme-overview.svg)
+## Overview
 
-A little module that makes scraping websites a little easier. Uses node.js and jQuery.
+`garethpaul/nodejs-scraper` is a Node.js or JavaScript project. NodeJS Screen Scraper
 
-## Installation
+This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: JavaScript (5).
 
-Via [npm](http://github.com/isaacs/npm):
+## Repository Contents
 
-    $ npm install scraper
+- `README.md` - project overview and local usage notes
+- `package.json` - JavaScript dependency and script metadata
+- `examples` - source or example code
+- `lib` - source or example code
+- `SECURITY.md` - security reporting and disclosure guidance
+- `VISION.md` - project direction and maintenance guardrails
 
-## Examples
+Additional scan context:
 
-### Simple
-First argument is an url as a string, second is a callback which exposes a jQuery object with your scraped site as "body" and third is an object from the request containing info about the url.
+- Source directories: examples, lib
+- Dependency and build manifests: package.json
+- Entry points or build surfaces: package.json
+- Test-looking files: examples/test.js
 
-    var scraper = require('scraper');
-    scraper('http://search.twitter.com/search?q=javascript', function(err, jQuery) {
-        if (err) {throw err}
+## Getting Started
 
-        jQuery('.msg').each(function() {
-            console.log(jQuery(this).text().trim()+'\n');
-        });
-    });
-### "Advanced"
-First argument is an object containing settings for the "request" instance used internally, second is a callback which exposes a jQuery object with your scraped site as "body" and third is an object from the request containing info about the url.
+### Prerequisites
 
-    var scraper = require('scraper');
-    scraper(
-	    {
-           'uri': 'http://search.twitter.com/search?q=nodejs'
-               , 'headers': {
-                   'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
-               }
-        }
-        , function(err, $) {
-            if (err) {throw err}
+- Git
+- Node.js and npm
 
-            $('.msg').each(function() {
-                console.log($(this).text().trim()+'\n');
-            });
-        }
-    );
-### Parallel
-First argument is an array containing either strings or objects, second is a callback which exposes a jQuery object with your scraped site as "body" and third is an object from the request containing info about the url.
+### Setup
 
-**You can also add rate limiting to the fetcher by adding an options object as the third argument containing 'reqPerSec': float.**
+```bash
+git clone https://github.com/garethpaul/nodejs-scraper.git
+cd nodejs-scraper
+npm install
+```
 
-    var scraper = require('scraper');
-    scraper(
-	    [
-            'http://search.twitter.com/search?q=javascript'
-            , 'http://search.twitter.com/search?q=css'
-            , {
-                'uri': 'http://search.twitter.com/search?q=nodejs'
-                , 'headers': {
-                    'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
-                }
-            }
-            , 'http://search.twitter.com/search?q=html5'
-        ]
-        , function(err, $) {
-            if (err) {throw err;}
+The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
-            $('.msg').each(function() {
-                console.log($(this).text().trim()+'\n');
-            });
-        }
-        , {
-            'reqPerSec': 0.2 // Wait 5sec between each external request
-        }
-    );
+## Running or Using the Project
 
-## Arguments
+- Inspect `package.json` for available npm scripts before running the project.
 
-### First (required)
-Contains the info about what page/pages will be scraped
+## Testing and Verification
 
-#### string
-    'http://www.nodejs.org'
-**or**
+- No dedicated automated test command was identified from the checked-in files. Verify changes by running the relevant build or manually exercising the sample.
 
-#### request object
-    {
-       'uri': 'http://search.twitter.com/search?q=nodejs'
-           , 'headers': {
-               'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
-           }
-    }
-**or**
+When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
-#### Array (if you want to do fetches on multiple URLs)
-    [
-        urlString
-        , urlString
-        , requestObject
-        , urlString
-    ]
+## Configuration and Secrets
 
-### Second (optional)
-The callback that allows you do use the data retrieved from the fetch.
+- Detected references to Twitter. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
 
-    function(err, $) {
-        if (err) {throw err;}
-        
-        $('.msg').each(function() {
-            console.log($(this).text().trim()+'\n');
-        }
-    }
+## Security and Privacy Notes
 
-### Third (optional)
-This argument is an object containing settings for the fetcher overall.
+- Review changes touching external API calls or credential-adjacent configuration; examples from the scan include examples/advanced.js, examples/parallel.js, examples/simple.js.
+- Review changes touching network requests, sockets, or service endpoints; examples from the scan include examples/advanced.js, examples/parallel.js, examples/simple.js, examples/test.js, and 1 more.
 
-* **reqPerSec**: float; (allows you to throttle your fetches so you don't hammer the server you are scraping)
+## Maintenance Notes
 
-## Depends on
-* [tmpvar](https://github.com/tmpvar/)'s [jsdom](https://github.com/tmpvar/jsdom)
-* [mikeal](https://github.com/mikeal/)'s [request](https://github.com/mikeal/node-utils/tree/master/request)
-* [jquery](https://github.com/jquery/jquery)
+- See `SECURITY.md` for vulnerability reporting and safe research guidance.
+- See `VISION.md` for project direction and contribution guardrails.
+
+## Contributing
+
+Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
+
+## Existing Project Notes
+
+Prior README summary:
+
+> node-scraper <!-- README-OVERVIEW-IMAGE --> A little module that makes scraping websites a little easier. Uses node.js and jQuery. Installation Via [npm](http://github.com/isaacs/npm): $ npm install scraper Examples Simple
+
