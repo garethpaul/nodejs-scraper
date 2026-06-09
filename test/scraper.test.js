@@ -182,4 +182,20 @@ test('does not stall queued requests for non-positive reqPerSec', function(done)
 	}, { reqPerSec: -1 });
 });
 
+test('treats non-function callbacks as no-op', function(done) {
+	var called = false;
+	var scraper = scraperWithRequest(function(options, callback) {
+		called = true;
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><head></head><body></body></html>');
+		});
+	});
+
+	scraper('https://example.com', 'not a callback');
+	setTimeout(function() {
+		assert.equal(called, true);
+		done();
+	}, 30);
+});
+
 run(0);

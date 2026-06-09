@@ -26,6 +26,7 @@ Priority:
 - Keep request and fetch option normalization free of caller-visible mutation
 - Keep examples bounded and runnable from the repository checkout
 - Keep non-positive `reqPerSec` values from stalling queued requests
+- Keep non-function callbacks from throwing during asynchronous completion
 
 Next priorities:
 

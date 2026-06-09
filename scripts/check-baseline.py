@@ -17,6 +17,7 @@ REQUIRED = [
     "docs/plans/2026-06-08-scraper-baseline.md",
     "docs/plans/2026-06-09-fetch-options-immutability.md",
     "docs/plans/2026-06-09-non-positive-rate-limit.md",
+    "docs/plans/2026-06-09-non-function-callback.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -58,6 +59,7 @@ def main():
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
+        "typeof callback !== 'function'",
         "var reqPerSec = normalizeReqPerSec",
         "body = (body || '').replace",
         "return;",
@@ -81,6 +83,7 @@ def main():
         "handles non-200 responses",
         "does not skip queued requests",
         "does not stall queued requests for non-positive reqPerSec",
+        "treats non-function callbacks as no-op",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -113,6 +116,7 @@ def main():
         "rate limits",
         "non-positive",
         "reqPerSec",
+        "non-function callbacks",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -126,6 +130,9 @@ def main():
     rate_limit_plan = read("docs/plans/2026-06-09-non-positive-rate-limit.md")
     if "status: completed" not in rate_limit_plan or "reqPerSec" not in rate_limit_plan:
         failures.append("rate limit plan must record completed status and verification")
+    callback_plan = read("docs/plans/2026-06-09-non-function-callback.md")
+    if "status: completed" not in callback_plan or "non-function callbacks" not in callback_plan:
+        failures.append("callback plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

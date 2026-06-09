@@ -42,6 +42,8 @@ robots guidance, and caller-provided rate limits. Tests should inject fake
 request clients instead of contacting live sites, and network errors should
 reach callbacks without exposing or logging captured page content.
 Non-positive `reqPerSec` values should not stall queued requests.
+Non-function callbacks should be treated as no-ops so invalid caller input does
+not become an asynchronous process-level exception.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

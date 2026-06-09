@@ -19,3 +19,5 @@
 - Added queue coverage so concurrent fetches cannot silently skip items.
 - Avoided mutating caller-provided fetch options while applying defaults.
 - Treated non-positive `reqPerSec` values as unthrottled so queues still drain.
+- Treated non-function callbacks as no-ops so async request completion cannot
+  throw after a caller supplies an invalid callback value.
