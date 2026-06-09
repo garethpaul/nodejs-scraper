@@ -15,6 +15,7 @@ REQUIRED = [
     "SECURITY.md",
     "VISION.md",
     "docs/plans/2026-06-08-scraper-baseline.md",
+    "docs/plans/2026-06-09-fetch-options-immutability.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -54,6 +55,7 @@ def main():
         "function normalizeRequestOptions",
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
+        "normalizedFetchOptions",
         "body = (body || '').replace",
         "return;",
     ]:
@@ -63,11 +65,14 @@ def main():
         failures.append("scraper must not read response body before error checks")
     if "requestOptions[key] =" in source:
         failures.append("scraper must not mutate caller request options while applying defaults")
+    if "fetchOptions[key] =" in source:
+        failures.append("scraper must not mutate caller fetch options while applying defaults")
 
     tests = read("test/scraper.test.js")
     for phrase in [
         "normalizes string request options",
         "does not mutate request options",
+        "does not mutate fetch options",
         "reports missing uri",
         "handles request errors",
         "handles non-200 responses",
@@ -109,6 +114,9 @@ def main():
     plan = read("docs/plans/2026-06-08-scraper-baseline.md")
     if "status: completed" not in plan or "npm test" not in plan:
         failures.append("plan must record completed status and verification")
+    fetch_options_plan = read("docs/plans/2026-06-09-fetch-options-immutability.md")
+    if "status: completed" not in fetch_options_plan or "npm test" not in fetch_options_plan:
+        failures.append("fetch options plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

@@ -23,12 +23,14 @@ Priority:
 - Avoid encouraging aggressive scraping or bypassing site rules
 - Maintain package metadata and the pinned legacy `request/jsdom` contract
 - Keep no-network tests for request options and network errors
+- Keep request and fetch option normalization free of caller-visible mutation
 - Keep examples bounded and runnable from the repository checkout
 
 Next priorities:
 
 - Document Node version and legacy dependency constraints
 - Add tests around callback ordering and parallel throttling
+- Add clearer examples for non-mutating option reuse
 - Modernize request/jsdom dependencies in a dedicated pass
 - Clarify robots, terms, and rate-limit expectations for users
 

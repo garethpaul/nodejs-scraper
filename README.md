@@ -57,6 +57,8 @@ The manifest declares `node >=6` to match the pinned `request` package.
 
 - Import `scraper` from `lib/scraper.js` or use the package entry point.
 - Pass a URL string, request options object, or array of either form.
+- Caller-provided request and fetch option objects are not mutated while
+  defaults are applied.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
 - Example scripts import `../lib/scraper` so they can run from this checkout.
@@ -83,7 +85,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Review changes touching network requests, sockets, or service endpoints; examples from the scan include examples/advanced.js, examples/parallel.js, examples/simple.js, examples/test.js, and 1 more.
 - Tests should avoid external requests by injecting fake request/jsdom
   dependencies. Network errors should be surfaced to callbacks without reading
-  missing response bodies.
+  missing response bodies, and option defaults should not mutate caller inputs.
 - Scraping workflows should respect robots guidance, terms of service, and
   rate limits.
 

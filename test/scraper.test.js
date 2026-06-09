@@ -82,6 +82,21 @@ test('does not mutate request options', function(done) {
 	done();
 });
 
+test('does not mutate fetch options', function(done) {
+	var fetchOptions = {};
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><head></head><body></body></html>');
+		});
+	});
+
+	scraper('https://example.com', function(err) {
+		assert.ifError(err);
+		assert.equal(fetchOptions.reqPerSec, undefined);
+		done();
+	}, fetchOptions);
+});
+
 test('reports missing uri without calling request', function(done) {
 	var called = false;
 	var scraper = scraperWithRequest(function() {

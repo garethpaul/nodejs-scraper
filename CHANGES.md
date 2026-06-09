@@ -17,3 +17,4 @@
 - Made examples import `../lib/scraper`, bounded the localhost load example,
   and closed its server after callbacks.
 - Added queue coverage so concurrent fetches cannot silently skip items.
+- Avoided mutating caller-provided fetch options while applying defaults.
