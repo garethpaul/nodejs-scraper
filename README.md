@@ -59,6 +59,8 @@ The manifest declares `node >=6` to match the pinned `request` package.
 - Pass a URL string, request options object, or array of either form.
 - Request URIs must be HTTP(S); non-web schemes are rejected before the request
   client is called.
+- HTTP(S) hosts are required, so malformed URLs like `http://` are rejected
+  before the request client is called.
 - Caller-provided request and fetch option objects are not mutated while
   defaults are applied.
 - Non-object headers are ignored during request option normalization, while the
@@ -95,7 +97,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
   missing response bodies, non-function callbacks should not throw during async
   completion, non-object headers should not create numeric header names, and
   option defaults should not mutate caller inputs. HTTP(S) URI validation should
-  reject non-web schemes before request dispatch.
+  reject non-web schemes and missing HTTP(S) hosts before request dispatch.
 - Scraping workflows should respect robots guidance, terms of service, and
   rate limits.
 - Treat non-positive `reqPerSec` values as a caller mistake rather than a

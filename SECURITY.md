@@ -48,6 +48,8 @@ Non-object headers should be ignored during normalization so invalid caller
 input does not create numeric request header names.
 Request URIs should stay limited to HTTP(S) schemes before dispatch to the
 request client.
+HTTP(S) hosts should be required before dispatch so malformed HTTP URLs do not
+reach the request client.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

@@ -29,6 +29,7 @@ Priority:
 - Keep non-positive `reqPerSec` values from stalling queued requests
 - Keep non-function callbacks from throwing during asynchronous completion
 - Keep request URI dispatch limited to HTTP(S) schemes
+- Keep HTTP(S) hosts required before request dispatch
 
 Next priorities:
 
@@ -47,6 +48,7 @@ Contribution rules:
 - Document API-breaking changes.
 - Preserve non-object headers handling when changing request normalization.
 - Preserve HTTP(S) URI validation when changing request dispatch.
+- Preserve HTTP(S) host validation when changing request dispatch.
 
 ## Security And Responsible Use
 

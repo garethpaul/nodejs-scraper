@@ -20,6 +20,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-non-function-callback.md",
     "docs/plans/2026-06-09-non-object-headers.md",
     "docs/plans/2026-06-09-http-uri-validation.md",
+    "docs/plans/2026-06-09-http-uri-host-validation.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -60,6 +61,9 @@ def main():
         "function normalizeRequestOptions",
         "function normalizeReqPerSec",
         "function isHttpUri",
+        "require('url')",
+        "url.parse(uri)",
+        "parsed.hostname",
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
@@ -88,6 +92,7 @@ def main():
         "does not mutate fetch options",
         "reports missing uri",
         "rejects non-http request uri without calling request",
+        "rejects http request uri without host without calling request",
         "handles request errors",
         "handles non-200 responses",
         "does not skip queued requests",
@@ -128,6 +133,7 @@ def main():
         "non-function callbacks",
         "non-object headers",
         "HTTP(S)",
+        "HTTP(S) hosts",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -150,6 +156,9 @@ def main():
     uri_plan = read("docs/plans/2026-06-09-http-uri-validation.md")
     if "status: completed" not in uri_plan or "HTTP(S)" not in uri_plan:
         failures.append("HTTP URI validation plan must record completed status and verification")
+    uri_host_plan = read("docs/plans/2026-06-09-http-uri-host-validation.md")
+    if "status: completed" not in uri_host_plan or "HTTP(S) hosts" not in uri_host_plan:
+        failures.append("HTTP URI host validation plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

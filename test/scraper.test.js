@@ -143,6 +143,23 @@ test('rejects non-http request uri without calling request', function(done) {
 	});
 });
 
+test('rejects http request uri without host without calling request', function(done) {
+	var called = false;
+	var scraper = scraperWithRequest(function(options, callback) {
+		called = true;
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><head></head><body></body></html>');
+		});
+	});
+
+	scraper('http://', function(err) {
+		assert(err);
+		assert(err.message.indexOf('http or https') !== -1);
+		assert.equal(called, false);
+		done();
+	});
+});
+
 test('handles request errors without reading body', function(done) {
 	var scraper = scraperWithRequest(function(options, callback) {
 		process.nextTick(function() {

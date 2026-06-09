@@ -23,3 +23,5 @@
   throw after a caller supplies an invalid callback value.
 - Ignored non-object headers during request option normalization.
 - Rejected non-HTTP(S) request URIs before dispatching to the request client.
+- Rejected HTTP(S) request URIs without hosts before dispatching to the request
+  client.
