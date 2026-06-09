@@ -16,6 +16,7 @@ REQUIRED = [
     "VISION.md",
     "docs/plans/2026-06-08-scraper-baseline.md",
     "docs/plans/2026-06-09-fetch-options-immutability.md",
+    "docs/plans/2026-06-09-non-positive-rate-limit.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -53,9 +54,11 @@ def main():
     for phrase in [
         "function createScraper",
         "function normalizeRequestOptions",
+        "function normalizeReqPerSec",
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
+        "var reqPerSec = normalizeReqPerSec",
         "body = (body || '').replace",
         "return;",
     ]:
@@ -77,6 +80,7 @@ def main():
         "handles request errors",
         "handles non-200 responses",
         "does not skip queued requests",
+        "does not stall queued requests for non-positive reqPerSec",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -107,6 +111,8 @@ def main():
         "request/jsdom",
         "example.test",
         "rate limits",
+        "non-positive",
+        "reqPerSec",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -117,6 +123,9 @@ def main():
     fetch_options_plan = read("docs/plans/2026-06-09-fetch-options-immutability.md")
     if "status: completed" not in fetch_options_plan or "npm test" not in fetch_options_plan:
         failures.append("fetch options plan must record completed status and verification")
+    rate_limit_plan = read("docs/plans/2026-06-09-non-positive-rate-limit.md")
+    if "status: completed" not in rate_limit_plan or "reqPerSec" not in rate_limit_plan:
+        failures.append("rate limit plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

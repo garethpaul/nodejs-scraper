@@ -25,11 +25,13 @@ Priority:
 - Keep no-network tests for request options and network errors
 - Keep request and fetch option normalization free of caller-visible mutation
 - Keep examples bounded and runnable from the repository checkout
+- Keep non-positive `reqPerSec` values from stalling queued requests
 
 Next priorities:
 
 - Document Node version and legacy dependency constraints
 - Add tests around callback ordering and parallel throttling
+- Add broader rate-limit tests for fractional and string `reqPerSec` values
 - Add clearer examples for non-mutating option reuse
 - Modernize request/jsdom dependencies in a dedicated pass
 - Clarify robots, terms, and rate-limit expectations for users

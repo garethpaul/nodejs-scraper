@@ -64,6 +64,8 @@ The manifest declares `node >=6` to match the pinned `request` package.
 - Example scripts import `../lib/scraper` so they can run from this checkout.
 - Use `reqPerSec` when issuing multiple external requests so callers do not
   overwhelm target services.
+- Non-positive `reqPerSec` values are treated as unthrottled so the request
+  queue still drains.
 
 ## Testing and Verification
 
@@ -88,6 +90,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   missing response bodies, and option defaults should not mutate caller inputs.
 - Scraping workflows should respect robots guidance, terms of service, and
   rate limits.
+- Treat non-positive `reqPerSec` values as a caller mistake rather than a
+  queue-stalling throttle.
 
 ## Maintenance Notes
 

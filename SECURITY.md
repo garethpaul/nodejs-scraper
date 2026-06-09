@@ -41,6 +41,7 @@ For this scraper, also review whether external requests respect target terms,
 robots guidance, and caller-provided rate limits. Tests should inject fake
 request clients instead of contacting live sites, and network errors should
 reach callbacks without exposing or logging captured page content.
+Non-positive `reqPerSec` values should not stall queued requests.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

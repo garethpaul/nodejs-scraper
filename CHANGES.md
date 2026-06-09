@@ -18,3 +18,4 @@
   and closed its server after callbacks.
 - Added queue coverage so concurrent fetches cannot silently skip items.
 - Avoided mutating caller-provided fetch options while applying defaults.
+- Treated non-positive `reqPerSec` values as unthrottled so queues still drain.

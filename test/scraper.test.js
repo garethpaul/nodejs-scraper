@@ -158,4 +158,28 @@ test('does not skip queued requests', function(done) {
 	});
 });
 
+test('does not stall queued requests for non-positive reqPerSec', function(done) {
+	var calledUris = [];
+	var callbackCount = 0;
+	var timeout = setTimeout(function() {
+		done(new Error('non-positive reqPerSec stalled the queue'));
+	}, 250);
+	var scraper = scraperWithRequest(function(options, callback) {
+		calledUris.push(options.uri);
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><head></head><body></body></html>');
+		});
+	});
+
+	scraper(['https://a.example', 'https://b.example'], function(err) {
+		assert.ifError(err);
+		callbackCount += 1;
+		if (callbackCount === 2) {
+			clearTimeout(timeout);
+			assert.deepEqual(calledUris, ['https://a.example', 'https://b.example']);
+			done();
+		}
+	}, { reqPerSec: -1 });
+});
+
 run(0);
