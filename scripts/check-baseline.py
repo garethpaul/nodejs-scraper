@@ -19,6 +19,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-non-positive-rate-limit.md",
     "docs/plans/2026-06-09-non-function-callback.md",
     "docs/plans/2026-06-09-non-object-headers.md",
+    "docs/plans/2026-06-09-http-uri-validation.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -58,10 +59,13 @@ def main():
         "function normalizeHeaders",
         "function normalizeRequestOptions",
         "function normalizeReqPerSec",
+        "function isHttpUri",
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
         "typeof callback !== 'function'",
+        "isHttpUri(requestOptions['uri'])",
+        "http or https uri",
         "Array.isArray(headers)",
         "var reqPerSec = normalizeReqPerSec",
         "body = (body || '').replace",
@@ -83,6 +87,7 @@ def main():
         "ignores non-object request headers",
         "does not mutate fetch options",
         "reports missing uri",
+        "rejects non-http request uri without calling request",
         "handles request errors",
         "handles non-200 responses",
         "does not skip queued requests",
@@ -122,6 +127,7 @@ def main():
         "reqPerSec",
         "non-function callbacks",
         "non-object headers",
+        "HTTP(S)",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -141,6 +147,9 @@ def main():
     headers_plan = read("docs/plans/2026-06-09-non-object-headers.md")
     if "status: completed" not in headers_plan or "non-object headers" not in headers_plan:
         failures.append("non-object headers plan must record completed status and verification")
+    uri_plan = read("docs/plans/2026-06-09-http-uri-validation.md")
+    if "status: completed" not in uri_plan or "HTTP(S)" not in uri_plan:
+        failures.append("HTTP URI validation plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

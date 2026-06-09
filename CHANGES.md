@@ -22,3 +22,4 @@
 - Treated non-function callbacks as no-ops so async request completion cannot
   throw after a caller supplies an invalid callback value.
 - Ignored non-object headers during request option normalization.
+- Rejected non-HTTP(S) request URIs before dispatching to the request client.

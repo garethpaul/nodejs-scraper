@@ -46,6 +46,8 @@ Non-function callbacks should be treated as no-ops so invalid caller input does
 not become an asynchronous process-level exception.
 Non-object headers should be ignored during normalization so invalid caller
 input does not create numeric request header names.
+Request URIs should stay limited to HTTP(S) schemes before dispatch to the
+request client.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

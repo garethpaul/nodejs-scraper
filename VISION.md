@@ -28,6 +28,7 @@ Priority:
 - Keep examples bounded and runnable from the repository checkout
 - Keep non-positive `reqPerSec` values from stalling queued requests
 - Keep non-function callbacks from throwing during asynchronous completion
+- Keep request URI dispatch limited to HTTP(S) schemes
 
 Next priorities:
 
@@ -45,6 +46,7 @@ Contribution rules:
 - Keep examples respectful of target services.
 - Document API-breaking changes.
 - Preserve non-object headers handling when changing request normalization.
+- Preserve HTTP(S) URI validation when changing request dispatch.
 
 ## Security And Responsible Use
 
