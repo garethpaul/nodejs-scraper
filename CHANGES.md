@@ -25,5 +25,6 @@
 - Rejected non-HTTP(S) request URIs before dispatching to the request client.
 - Rejected HTTP(S) request URIs without hosts before dispatching to the request
   client.
+- Rejected HTTP(S) URI credentials before dispatching to the request client.
 - Added `make lint` and `make build` aliases alongside `make test` and
   `make check` for consistent local verification.

@@ -22,6 +22,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-non-object-headers.md",
     "docs/plans/2026-06-09-http-uri-validation.md",
     "docs/plans/2026-06-09-http-uri-host-validation.md",
+    "docs/plans/2026-06-09-http-uri-credential-validation.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
@@ -77,6 +78,7 @@ def main():
         "require('url')",
         "url.parse(uri)",
         "parsed.hostname",
+        "parsed.auth",
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
@@ -106,6 +108,7 @@ def main():
         "reports missing uri",
         "rejects non-http request uri without calling request",
         "rejects http request uri without host without calling request",
+        "rejects http request uri with credentials without calling request",
         "handles request errors",
         "handles non-200 responses",
         "does not skip queued requests",
@@ -147,6 +150,7 @@ def main():
         "non-object headers",
         "HTTP(S)",
         "HTTP(S) hosts",
+        "HTTP(S) URI credentials",
         "make lint",
         "make test",
         "make build",
@@ -180,6 +184,9 @@ def main():
     uri_host_plan = read("docs/plans/2026-06-09-http-uri-host-validation.md")
     if "status: completed" not in uri_host_plan or "HTTP(S) hosts" not in uri_host_plan:
         failures.append("HTTP URI host validation plan must record completed status and verification")
+    uri_credentials_plan = read("docs/plans/2026-06-09-http-uri-credential-validation.md")
+    if "status: completed" not in uri_credentials_plan or "HTTP(S) URI credentials" not in uri_credentials_plan:
+        failures.append("HTTP URI credential validation plan must record completed status and verification")
     make_gate_plan_path = ROOT / "docs/plans/2026-06-09-make-gate-aliases.md"
     make_gate_plan = make_gate_plan_path.read_text(encoding="utf-8") if make_gate_plan_path.exists() else ""
     if "status: completed" not in make_gate_plan or "make lint" not in make_gate_plan or "make build" not in make_gate_plan:

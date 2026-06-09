@@ -30,6 +30,7 @@ Priority:
 - Keep non-function callbacks from throwing during asynchronous completion
 - Keep request URI dispatch limited to HTTP(S) schemes
 - Keep HTTP(S) hosts required before request dispatch
+- Keep HTTP(S) URI credentials rejected before request dispatch
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   local npm/static baseline
 
@@ -51,6 +52,7 @@ Contribution rules:
 - Preserve non-object headers handling when changing request normalization.
 - Preserve HTTP(S) URI validation when changing request dispatch.
 - Preserve HTTP(S) host validation when changing request dispatch.
+- Preserve HTTP(S) URI credentials rejection when changing request dispatch.
 - Run `make lint`, `make test`, `make build`, and `make check` before pushing
   behavior, dependency, or example changes.
 
