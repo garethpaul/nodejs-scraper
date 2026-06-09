@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     ".gitignore",
     "CHANGES.md",
+    "Makefile",
     "README.md",
     "SECURITY.md",
     "VISION.md",
@@ -21,6 +22,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-non-object-headers.md",
     "docs/plans/2026-06-09-http-uri-validation.md",
     "docs/plans/2026-06-09-http-uri-host-validation.md",
+    "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -53,6 +55,17 @@ def main():
         failures.append("package.json must pin request to the documented legacy version")
     if dependencies.get("jsdom") != "0.2.19":
         failures.append("package.json must pin jsdom to the documented legacy API version")
+
+    makefile = read("Makefile")
+    for phrase in [
+        ".PHONY: build check lint static-check test verify",
+        "check: verify",
+        "verify: test static-check",
+        "lint build: static-check",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/check-baseline.py",
+    ]:
+        if phrase not in makefile:
+            failures.append(f"Makefile must include standard gate alias: {phrase}")
 
     source = read("lib/scraper.js")
     for phrase in [
@@ -134,9 +147,17 @@ def main():
         "non-object headers",
         "HTTP(S)",
         "HTTP(S) hosts",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
+    changes = read("CHANGES.md")
+    for phrase in ["make lint", "make test", "make build", "make check"]:
+        if phrase not in changes:
+            failures.append(f"CHANGES must mention {phrase}")
 
     plan = read("docs/plans/2026-06-08-scraper-baseline.md")
     if "status: completed" not in plan or "npm test" not in plan:
@@ -159,6 +180,10 @@ def main():
     uri_host_plan = read("docs/plans/2026-06-09-http-uri-host-validation.md")
     if "status: completed" not in uri_host_plan or "HTTP(S) hosts" not in uri_host_plan:
         failures.append("HTTP URI host validation plan must record completed status and verification")
+    make_gate_plan_path = ROOT / "docs/plans/2026-06-09-make-gate-aliases.md"
+    make_gate_plan = make_gate_plan_path.read_text(encoding="utf-8") if make_gate_plan_path.exists() else ""
+    if "status: completed" not in make_gate_plan or "make lint" not in make_gate_plan or "make build" not in make_gate_plan:
+        failures.append("make gate alias plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

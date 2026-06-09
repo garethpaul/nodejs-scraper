@@ -44,6 +44,10 @@ Additional scan context:
 git clone https://github.com/garethpaul/nodejs-scraper.git
 cd nodejs-scraper
 npm install
+make lint
+make test
+make build
+make check
 npm run check
 ```
 
@@ -78,6 +82,9 @@ The manifest declares `node >=6` to match the pinned `request` package.
 
 - `npm test`
 - `npm run check`
+- `make lint`
+- `make test`
+- `make build`
 - `make check`
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -106,8 +113,10 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Maintenance Notes
 
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
-- Run `npm run check` before changing scraper behavior, request handling, or
-  examples.
+- Run `npm run check`, `make lint`, `make test`, `make build`, and
+  `make check` before changing scraper behavior, request handling, or examples.
+- See `docs/plans/2026-06-09-make-gate-aliases.md` for the local verification
+  gate aliases.
 - Keep `request/jsdom` changes explicit and tested because modern jsdom removed
   the APIs used by this package.
 - See `VISION.md` for project direction and contribution guardrails.

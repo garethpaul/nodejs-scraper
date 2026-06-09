@@ -1,9 +1,15 @@
-.PHONY: check test static-check
+.PHONY: build check lint static-check test verify
 
-check: test static-check
+PYTHON ?= python3
+
+check: verify
+
+verify: test static-check
 
 test:
 	npm test
 
+lint build: static-check
+
 static-check:
-	python3 scripts/check-baseline.py
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/check-baseline.py

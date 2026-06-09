@@ -59,7 +59,8 @@ Dependency updates should come from trusted package managers and should keep loc
 
 The current manifest pins a legacy `request/jsdom` API contract for
 deterministic maintenance. Modernizing either package should be treated as a
-security-sensitive compatibility change and verified with `npm run check`.
+security-sensitive compatibility change and verified with `npm run check`,
+`make lint`, `make test`, `make build`, and `make check`.
 
 ## Safe Research Guidelines
 
