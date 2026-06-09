@@ -59,6 +59,8 @@ The manifest declares `node >=6` to match the pinned `request` package.
 - Pass a URL string, request options object, or array of either form.
 - Caller-provided request and fetch option objects are not mutated while
   defaults are applied.
+- Non-object headers are ignored during request option normalization, while the
+  default `User-Agent` header is retained.
 - Missing or non-function callbacks are treated as no-ops.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
@@ -89,7 +91,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Tests should avoid external requests by injecting fake request/jsdom
   dependencies. Network errors should be surfaced to callbacks without reading
   missing response bodies, non-function callbacks should not throw during async
-  completion, and option defaults should not mutate caller inputs.
+  completion, non-object headers should not create numeric header names, and
+  option defaults should not mutate caller inputs.
 - Scraping workflows should respect robots guidance, terms of service, and
   rate limits.
 - Treat non-positive `reqPerSec` values as a caller mistake rather than a

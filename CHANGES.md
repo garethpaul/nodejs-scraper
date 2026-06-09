@@ -21,3 +21,4 @@
 - Treated non-positive `reqPerSec` values as unthrottled so queues still drain.
 - Treated non-function callbacks as no-ops so async request completion cannot
   throw after a caller supplies an invalid callback value.
+- Ignored non-object headers during request option normalization.

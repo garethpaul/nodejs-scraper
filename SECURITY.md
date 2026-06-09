@@ -44,6 +44,8 @@ reach callbacks without exposing or logging captured page content.
 Non-positive `reqPerSec` values should not stall queued requests.
 Non-function callbacks should be treated as no-ops so invalid caller input does
 not become an asynchronous process-level exception.
+Non-object headers should be ignored during normalization so invalid caller
+input does not create numeric request header names.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

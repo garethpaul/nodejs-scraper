@@ -18,6 +18,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-fetch-options-immutability.md",
     "docs/plans/2026-06-09-non-positive-rate-limit.md",
     "docs/plans/2026-06-09-non-function-callback.md",
+    "docs/plans/2026-06-09-non-object-headers.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -54,12 +55,14 @@ def main():
     source = read("lib/scraper.js")
     for phrase in [
         "function createScraper",
+        "function normalizeHeaders",
         "function normalizeRequestOptions",
         "function normalizeReqPerSec",
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
         "typeof callback !== 'function'",
+        "Array.isArray(headers)",
         "var reqPerSec = normalizeReqPerSec",
         "body = (body || '').replace",
         "return;",
@@ -77,6 +80,7 @@ def main():
     for phrase in [
         "normalizes string request options",
         "does not mutate request options",
+        "ignores non-object request headers",
         "does not mutate fetch options",
         "reports missing uri",
         "handles request errors",
@@ -117,6 +121,7 @@ def main():
         "non-positive",
         "reqPerSec",
         "non-function callbacks",
+        "non-object headers",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -133,6 +138,9 @@ def main():
     callback_plan = read("docs/plans/2026-06-09-non-function-callback.md")
     if "status: completed" not in callback_plan or "non-function callbacks" not in callback_plan:
         failures.append("callback plan must record completed status and verification")
+    headers_plan = read("docs/plans/2026-06-09-non-object-headers.md")
+    if "status: completed" not in headers_plan or "non-object headers" not in headers_plan:
+        failures.append("non-object headers plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

@@ -82,6 +82,22 @@ test('does not mutate request options', function(done) {
 	done();
 });
 
+test('ignores non-object request headers', function(done) {
+	var stringHeaders = scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		headers: 'Accept: text/html'
+	});
+	var arrayHeaders = scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		headers: ['Accept: text/html']
+	});
+
+	assert.equal(stringHeaders.headers['User-Agent'], 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)');
+	assert.equal(stringHeaders.headers['0'], undefined);
+	assert.equal(arrayHeaders.headers['0'], undefined);
+	done();
+});
+
 test('does not mutate fetch options', function(done) {
 	var fetchOptions = {};
 	var scraper = scraperWithRequest(function(options, callback) {

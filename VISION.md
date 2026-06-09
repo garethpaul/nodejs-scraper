@@ -24,6 +24,7 @@ Priority:
 - Maintain package metadata and the pinned legacy `request/jsdom` contract
 - Keep no-network tests for request options and network errors
 - Keep request and fetch option normalization free of caller-visible mutation
+- Keep non-object headers from leaking into normalized request options
 - Keep examples bounded and runnable from the repository checkout
 - Keep non-positive `reqPerSec` values from stalling queued requests
 - Keep non-function callbacks from throwing during asynchronous completion
@@ -43,6 +44,7 @@ Contribution rules:
 - Add tests for behavior changes.
 - Keep examples respectful of target services.
 - Document API-breaking changes.
+- Preserve non-object headers handling when changing request normalization.
 
 ## Security And Responsible Use
 
