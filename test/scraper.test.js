@@ -68,8 +68,53 @@ test('normalizes string request options', function(done) {
 	var options = scraperModule.normalizeRequestOptions('https://example.com');
 
 	assert.equal(options.uri, 'https://example.com');
+	assert.equal(options.timeout, 10000);
 	assert.equal(options.headers['User-Agent'], 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)');
 	done();
+});
+
+test('normalizes request timeouts', function(done) {
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: 2500
+	}).timeout, 2500);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: '1500'
+	}).timeout, 1500);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: 0
+	}).timeout, 10000);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: Infinity
+	}).timeout, 10000);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: true
+	}).timeout, 10000);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: '   '
+	}).timeout, 10000);
+	done();
+});
+
+test('dispatches bounded request timeouts', function(done) {
+	var receivedOptions;
+	var scraper = scraperWithRequest(function(options, callback) {
+		receivedOptions = options;
+		process.nextTick(function() {
+			callback(new Error('network failed'), null, undefined);
+		});
+	});
+
+	scraper('https://example.com', function(err) {
+		assert(err);
+		assert.equal(receivedOptions.timeout, 10000);
+		done();
+	});
 });
 
 test('does not mutate request options', function(done) {

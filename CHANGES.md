@@ -6,6 +6,8 @@
   static checks without installing the unlocked legacy dependency tree.
 - Added a header injection guard so CR/LF-bearing request header names and
   values are dropped during normalization.
+- Added a 10-second request timeout default with finite positive caller
+  overrides and fallback for invalid timeout values.
 
 ## 2026-06-08
 

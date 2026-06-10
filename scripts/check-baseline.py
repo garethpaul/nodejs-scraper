@@ -27,6 +27,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-10-header-injection-guard.md",
     "docs/plans/2026-06-10-hosted-no-install-validation.md",
+    "docs/plans/2026-06-10-request-timeout-default.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -77,6 +78,7 @@ def main():
         "function normalizeHeaders",
         "function isSafeHeader",
         "function normalizeRequestOptions",
+        "function normalizeRequestTimeout",
         "function normalizeReqPerSec",
         "function isHttpUri",
         "require('url')",
@@ -93,6 +95,9 @@ def main():
         "String(value).indexOf('\\r')",
         "String(value).indexOf('\\n')",
         "var reqPerSec = normalizeReqPerSec",
+        "'timeout': 10000",
+        "normalized.timeout = normalizeRequestTimeout(requestOptions.timeout)",
+        "typeof value !== 'number' && typeof value !== 'string'",
         "body = (body || '').replace",
         "return;",
     ]:
@@ -108,6 +113,8 @@ def main():
     tests = read("test/scraper.test.js")
     for phrase in [
         "normalizes string request options",
+        "normalizes request timeouts",
+        "dispatches bounded request timeouts",
         "does not mutate request options",
         "ignores non-object request headers",
         "drops unsafe request headers",
@@ -203,6 +210,11 @@ def main():
     header_injection_plan = header_injection_plan_path.read_text(encoding="utf-8") if header_injection_plan_path.exists() else ""
     if "status: completed" not in header_injection_plan or "header injection guard" not in header_injection_plan.lower():
         failures.append("header injection guard plan must record completed status and verification")
+
+    timeout_plan_path = ROOT / "docs/plans/2026-06-10-request-timeout-default.md"
+    timeout_plan = timeout_plan_path.read_text(encoding="utf-8") if timeout_plan_path.exists() else ""
+    if "status: completed" not in timeout_plan or "10-second request timeout" not in timeout_plan.lower():
+        failures.append("request timeout plan must record completed status and verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-no-install-validation.md")
     workflow = read(".github/workflows/check.yml")

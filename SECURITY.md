@@ -54,6 +54,9 @@ HTTP(S) hosts should be required before dispatch so malformed HTTP URLs do not
 reach the request client.
 HTTP(S) URI credentials should be rejected before dispatch so credential-bearing
 URLs do not reach the request client.
+Outbound requests use a 10-second timeout by default so an unresponsive target
+cannot hold a request open indefinitely. Callers may supply a finite positive
+timeout; invalid values fall back to the bounded default.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

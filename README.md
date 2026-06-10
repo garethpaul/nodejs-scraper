@@ -73,6 +73,8 @@ The manifest declares `node >=6` to match the pinned `request` package.
   default `User-Agent` header is retained.
 - The header injection guard drops caller-provided header names or values that
   contain CR/LF characters before dispatch.
+- Requests use a 10-second timeout by default. A finite positive `timeout`
+  option overrides that default; invalid timeout values fall back to it.
 - Missing or non-function callbacks are treated as no-ops.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
@@ -114,6 +116,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   before request dispatch.
 - The header injection guard should keep unsafe CR/LF header names and values
   out of normalized request options.
+- Keep the default request timeout bounded when callers omit or provide an
+  invalid `timeout` option.
 - Scraping workflows should respect robots guidance, terms of service, and
   rate limits.
 - Treat non-positive `reqPerSec` values as a caller mistake rather than a
