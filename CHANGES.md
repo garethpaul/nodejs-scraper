@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-10
+
+- Added a header injection guard so CR/LF-bearing request header names and
+  values are dropped during normalization.
+
 ## 2026-06-08
 
 - Added dependency-injected scraper tests that run without external requests.

@@ -25,6 +25,7 @@ Priority:
 - Keep no-network tests for request options and network errors
 - Keep request and fetch option normalization free of caller-visible mutation
 - Keep non-object headers from leaking into normalized request options
+- Keep the header injection guard around caller-provided header names and values
 - Keep examples bounded and runnable from the repository checkout
 - Keep non-positive `reqPerSec` values from stalling queued requests
 - Keep non-function callbacks from throwing during asynchronous completion
@@ -50,6 +51,7 @@ Contribution rules:
 - Keep examples respectful of target services.
 - Document API-breaking changes.
 - Preserve non-object headers handling when changing request normalization.
+- Preserve the header injection guard when changing request normalization.
 - Preserve HTTP(S) URI validation when changing request dispatch.
 - Preserve HTTP(S) host validation when changing request dispatch.
 - Preserve HTTP(S) URI credentials rejection when changing request dispatch.
@@ -65,6 +67,8 @@ Canonical security policy and reporting:
 Scraping can overload sites or collect sensitive data. Users should respect
 robots, terms, and rate limits. The library should not hide target URLs,
 credentials, or request behavior from callers.
+The header injection guard should keep CR/LF-bearing header names and values out
+of request options before dispatch.
 
 ## What We Will Not Merge (For Now)
 

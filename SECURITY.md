@@ -46,6 +46,8 @@ Non-function callbacks should be treated as no-ops so invalid caller input does
 not become an asynchronous process-level exception.
 Non-object headers should be ignored during normalization so invalid caller
 input does not create numeric request header names.
+The header injection guard should drop CR/LF-bearing header names and values
+before request dispatch.
 Request URIs should stay limited to HTTP(S) schemes before dispatch to the
 request client.
 HTTP(S) hosts should be required before dispatch so malformed HTTP URLs do not

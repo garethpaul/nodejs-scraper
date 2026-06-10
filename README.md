@@ -71,6 +71,8 @@ The manifest declares `node >=6` to match the pinned `request` package.
   defaults are applied.
 - Non-object headers are ignored during request option normalization, while the
   default `User-Agent` header is retained.
+- The header injection guard drops caller-provided header names or values that
+  contain CR/LF characters before dispatch.
 - Missing or non-function callbacks are treated as no-ops.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
@@ -108,6 +110,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   option defaults should not mutate caller inputs. HTTP(S) URI validation should
   reject non-web schemes, missing HTTP(S) hosts, and HTTP(S) URI credentials
   before request dispatch.
+- The header injection guard should keep unsafe CR/LF header names and values
+  out of normalized request options.
 - Scraping workflows should respect robots guidance, terms of service, and
   rate limits.
 - Treat non-positive `reqPerSec` values as a caller mistake rather than a
@@ -120,6 +124,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   `make check` before changing scraper behavior, request handling, or examples.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the local verification
   gate aliases.
+- See `docs/plans/2026-06-10-header-injection-guard.md` for the header
+  injection guard.
 - Keep `request/jsdom` changes explicit and tested because modern jsdom removed
   the APIs used by this package.
 - See `VISION.md` for project direction and contribution guardrails.

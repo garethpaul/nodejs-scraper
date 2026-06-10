@@ -98,6 +98,25 @@ test('ignores non-object request headers', function(done) {
 	done();
 });
 
+test('drops unsafe request headers', function(done) {
+	var options = scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		headers: {
+			Accept: 'text/html',
+			'X-Bad\r\nInjected': 'ok',
+			'X-Bad-Value': 'ok\r\nInjected: yes',
+			'X-Empty': null
+		}
+	});
+
+	assert.equal(options.headers.Accept, 'text/html');
+	assert.equal(options.headers['X-Bad\r\nInjected'], undefined);
+	assert.equal(options.headers['X-Bad-Value'], undefined);
+	assert.equal(options.headers['X-Empty'], undefined);
+	assert.equal(options.headers['User-Agent'], 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)');
+	done();
+});
+
 test('does not mutate fetch options', function(done) {
 	var fetchOptions = {};
 	var scraper = scraperWithRequest(function(options, callback) {

@@ -24,6 +24,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-http-uri-host-validation.md",
     "docs/plans/2026-06-09-http-uri-credential-validation.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
+    "docs/plans/2026-06-10-header-injection-guard.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -72,6 +73,7 @@ def main():
     for phrase in [
         "function createScraper",
         "function normalizeHeaders",
+        "function isSafeHeader",
         "function normalizeRequestOptions",
         "function normalizeReqPerSec",
         "function isHttpUri",
@@ -86,6 +88,8 @@ def main():
         "isHttpUri(requestOptions['uri'])",
         "http or https uri",
         "Array.isArray(headers)",
+        "String(value).indexOf('\\r')",
+        "String(value).indexOf('\\n')",
         "var reqPerSec = normalizeReqPerSec",
         "body = (body || '').replace",
         "return;",
@@ -104,6 +108,7 @@ def main():
         "normalizes string request options",
         "does not mutate request options",
         "ignores non-object request headers",
+        "drops unsafe request headers",
         "does not mutate fetch options",
         "reports missing uri",
         "rejects non-http request uri without calling request",
@@ -148,6 +153,7 @@ def main():
         "reqPerSec",
         "non-function callbacks",
         "non-object headers",
+        "header injection guard",
         "HTTP(S)",
         "HTTP(S) hosts",
         "HTTP(S) URI credentials",
@@ -191,6 +197,10 @@ def main():
     make_gate_plan = make_gate_plan_path.read_text(encoding="utf-8") if make_gate_plan_path.exists() else ""
     if "status: completed" not in make_gate_plan or "make lint" not in make_gate_plan or "make build" not in make_gate_plan:
         failures.append("make gate alias plan must record completed status and verification")
+    header_injection_plan_path = ROOT / "docs/plans/2026-06-10-header-injection-guard.md"
+    header_injection_plan = header_injection_plan_path.read_text(encoding="utf-8") if header_injection_plan_path.exists() else ""
+    if "status: completed" not in header_injection_plan or "header injection guard" not in header_injection_plan.lower():
+        failures.append("header injection guard plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")
