@@ -90,6 +90,8 @@ The manifest declares `node >=6` to match the pinned `request` package.
 - `make test`
 - `make build`
 - `make check`
+- Pinned `ubuntu-24.04` GitHub Actions runs the dependency-injected tests and
+  static baseline without `npm install`, external requests, or live scraping.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 

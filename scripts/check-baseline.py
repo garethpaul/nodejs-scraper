@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     ".gitignore",
+    ".github/workflows/check.yml",
     "CHANGES.md",
     "Makefile",
     "README.md",
@@ -25,6 +26,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-http-uri-credential-validation.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-10-header-injection-guard.md",
+    "docs/plans/2026-06-10-hosted-no-install-validation.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -201,6 +203,24 @@ def main():
     header_injection_plan = header_injection_plan_path.read_text(encoding="utf-8") if header_injection_plan_path.exists() else ""
     if "status: completed" not in header_injection_plan or "header injection guard" not in header_injection_plan.lower():
         failures.append("header injection guard plan must record completed status and verification")
+
+    hosted_plan = read("docs/plans/2026-06-10-hosted-no-install-validation.md")
+    workflow = read(".github/workflows/check.yml")
+    if "status: completed" not in hosted_plan or "make check" not in hosted_plan:
+        failures.append("hosted no-install validation plan must record status and verification")
+    for expected in [
+        "permissions:\n  contents: read",
+        "cancel-in-progress: true",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        'python-version: "3.12"',
+        "run: node --version",
+        "run: make check",
+    ]:
+        if expected not in workflow:
+            failures.append(f"Check workflow must keep {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

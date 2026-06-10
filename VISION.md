@@ -34,6 +34,8 @@ Priority:
 - Keep HTTP(S) URI credentials rejected before request dispatch
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   local npm/static baseline
+- Keep hosted Linux validation pinned, read-only, and independent of legacy
+  package installation
 
 Next priorities:
 

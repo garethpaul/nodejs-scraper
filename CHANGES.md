@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Added pinned, read-only hosted validation for dependency-injected tests and
+  static checks without installing the unlocked legacy dependency tree.
 - Added a header injection guard so CR/LF-bearing request header names and
   values are dropped during normalization.
 

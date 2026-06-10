@@ -66,6 +66,10 @@ deterministic maintenance. Modernizing either package should be treated as a
 security-sensitive compatibility change and verified with `npm run check`,
 `make lint`, `make test`, `make build`, and `make check`.
 
+The pinned Linux workflow runs dependency-injected tests without `npm install`,
+external requests, or live scraping. Installing the legacy dependency tree
+remains a separate modernization task until a lockfile is committed.
+
 ## Safe Research Guidelines
 
 Good-faith research is welcome when it stays within these boundaries:
