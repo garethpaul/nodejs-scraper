@@ -2,6 +2,10 @@
 
 ## 2026-06-12
 
+- Replaced legacy jsdom and vendored jQuery 1.6.1 with exact jsdom 29.1.1 and
+  jQuery 4.0.0 dependencies behind an injectable document adapter.
+- Added `package-lock.json`, real no-network parser integration tests, locked
+  hosted installation, and a production dependency audit with zero findings.
 - Replaced the retired direct `request` dependency with a Node 20 built-in
   HTTP(S) transport that validates public DNS results on every bounded redirect.
 - Added streaming response limits, redirect credential-header stripping, and

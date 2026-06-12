@@ -26,4 +26,6 @@ jobs:
         with:
           python-version: "3.12"
       - run: node --version
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm audit --omit=dev
       - run: make check

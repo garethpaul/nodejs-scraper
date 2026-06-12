@@ -2,6 +2,11 @@
 
 status: completed
 
+> Historical boundary: this no-install gate was valid while the repository had
+> an unlocked legacy parser tree. It was superseded on June 12, 2026 by the
+> exact `package-lock.json`, `npm ci --ignore-scripts`, and production-audit
+> contract in `2026-06-12-maintained-parser-lockfile.md`.
+
 ## Context
 
 The repository has dependency-injected tests that run without network access or

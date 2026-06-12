@@ -32,11 +32,15 @@ REQUIRED = [
     "docs/plans/2026-06-10-hosted-no-install-validation.md",
     "docs/plans/2026-06-10-request-timeout-default.md",
     "docs/plans/2026-06-12-response-body-parse-limit.md",
+    "docs/plans/2026-06-12-maintained-parser-lockfile.md",
     "docs/plans/2026-06-12-secure-built-in-transport.md",
     "docs/readme-overview.svg",
+    "lib/document.js",
     "lib/http-request.js",
     "lib/scraper.js",
     "package.json",
+    "package-lock.json",
+    "test/document.test.js",
     "test/http-request.test.js",
     "test/scraper.test.js",
 ]
@@ -62,21 +66,32 @@ def main():
 
     package = json.loads(read("package.json"))
     scripts = package.get("scripts", {})
-    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js":
+    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js":
         failures.append("package.json must expose npm test")
     if "scripts/check-baseline.py" not in scripts.get("check", ""):
         failures.append("package.json must expose npm run check")
     if package.get("main") != "./lib/scraper.js":
         failures.append("package.json main must point at ./lib/scraper.js")
-    if package.get("engines") != {"node": ">=20"}:
-        failures.append("package.json must require the maintained Node 20+ toolchain")
+    if package.get("engines") != {"node": ">=20.19.0"}:
+        failures.append("package.json must require the maintained jsdom-compatible Node 20 toolchain")
     if read(".nvmrc").strip() != "20":
         failures.append(".nvmrc must select Node 20")
     dependencies = package.get("dependencies", {})
     if "request" in dependencies:
         failures.append("package.json must not restore the retired request dependency")
-    if dependencies.get("jsdom") != "0.2.19":
-        failures.append("package.json must pin jsdom to the documented legacy API version")
+    if dependencies != {"jquery": "4.0.0", "jsdom": "29.1.1"}:
+        failures.append("package.json must pin the maintained parser dependencies exactly")
+
+    lock = json.loads(read("package-lock.json"))
+    locked_root = lock.get("packages", {}).get("", {})
+    if (lock.get("lockfileVersion") != 3 or
+            locked_root.get("dependencies") != dependencies or
+            locked_root.get("engines") != package.get("engines")):
+        failures.append("package-lock.json must lock the exact package and engine contract")
+    if "node_modules/request" in lock.get("packages", {}):
+        failures.append("package-lock.json must not contain the retired request package")
+    if (ROOT / "deps/jquery-1.6.1.min.js").exists():
+        failures.append("vendored jQuery 1.6.1 must stay removed")
 
     makefile = read("Makefile")
     for phrase in [
@@ -110,6 +125,7 @@ def main():
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
         "require('./http-request').createHttpRequest(deps.transport)",
+        "require('./document').createDocument",
         "typeof callback !== 'function'",
         "isHttpUri(requestOptions['uri'])",
         "http or https uri",
@@ -157,6 +173,21 @@ def main():
     if "require('request')" in source or "require(\"request\")" in source:
         failures.append("scraper must not restore the retired request transport")
 
+    document = read("lib/document.js")
+    for phrase in [
+        "require('jsdom').JSDOM",
+        "require('jquery/factory').jQueryFactory",
+        "process.nextTick",
+        "new Document(body)",
+        "$ = createJQuery(document.window)",
+        "callback(null, $)",
+        "callback(err, null)",
+    ]:
+        if phrase not in document:
+            failures.append(f"maintained document adapter must include {phrase}")
+    if "runScripts:" in document or "resources:" in document:
+        failures.append("document adapter must keep remote scripts and resources disabled")
+
     tests = read("test/scraper.test.js")
     for phrase in [
         "normalizes string request options",
@@ -182,6 +213,8 @@ def main():
         "rejects unsupported response body types before parsing",
         "falls back to the default parse limit for invalid overrides",
         "does not coerce boolean parse limits",
+        "reports document parser errors",
+        "parses successful responses with the maintained document adapter",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -201,6 +234,17 @@ def main():
         if phrase not in transport_tests:
             failures.append(f"transport tests must include {phrase}")
 
+    document_tests = read("test/document.test.js")
+    for phrase in [
+        "returns jQuery bound to parsed head and body content",
+        "repairs malformed HTML without executing inline scripts",
+        "does not load external document resources",
+        "reports parser construction errors through the callback",
+        "does not recast consumer callback exceptions as parser errors",
+    ]:
+        if phrase not in document_tests:
+            failures.append(f"document tests must include {phrase}")
+
     for path in ["examples/simple.js", "examples/advanced.js", "examples/parallel.js"]:
         example = read(path)
         if "require('../lib/scraper')" not in example:
@@ -215,7 +259,7 @@ def main():
         failures.append("examples/test.js must bound local load and close its server")
 
     gitignore = read(".gitignore")
-    for expected in ["node_modules/", "npm-debug.log", ".env"]:
+    for expected in ["node_modules/", "npm-debug.log", "__pycache__/", "*.py[cod]", ".env"]:
         if expected not in gitignore:
             failures.append(f".gitignore must include {expected}")
 
@@ -224,7 +268,10 @@ def main():
         "npm run check",
         "external requests",
         "network errors",
-        "legacy jsdom",
+        "jsdom 29.1.1",
+        "jQuery 4.0.0",
+        "package-lock.json",
+        "npm ci",
         "example.test",
         "rate limits",
         "non-positive",
@@ -356,8 +403,10 @@ def main():
             "node-version: \"20\"" in workflow and
             'python-version: "3.12"' in workflow and
             "run: node --version" in workflow and
+            "run: npm ci --ignore-scripts --no-audit --no-fund" in workflow and
+            "run: npm audit --omit=dev" in workflow and
             "run: make check" in workflow):
-        failures.append("Check workflow must stay singular, pinned, credential-free, read-only, Node 20, and bounded")
+        failures.append("Check workflow must stay singular, pinned, credential-free, read-only, locked, audited, Node 20, and bounded")
 
     transport_plan = read("docs/plans/2026-06-12-secure-built-in-transport.md")
     transport_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", transport_plan)
@@ -370,6 +419,17 @@ def main():
             "rejects redirects to private addresses" not in transport_tests or
             "response.destroy()" not in transport):
         failures.append("secure built-in transport plan must record completed status and verification")
+
+    parser_plan = read("docs/plans/2026-06-12-maintained-parser-lockfile.md")
+    parser_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", parser_plan)
+    parser_work = markdown_section(parser_plan, "Work Completed")
+    parser_verification = markdown_section(parser_plan, "Verification")
+    if (parser_status != ["completed"] or not parser_work or
+            not parser_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", parser_verification) or
+            "npm test" not in parser_verification or
+            "npm audit --omit=dev" not in parser_verification):
+        failures.append("maintained parser plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

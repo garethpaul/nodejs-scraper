@@ -15,7 +15,8 @@
 
 ## Development commands
 
-- Install dependencies: `npm install`
+- Install exact dependencies: `npm ci --ignore-scripts`
+- Audit production dependencies: `npm audit --omit=dev`
 - Full baseline: `make check`
 - Combined verification: `make verify`
 - Tests: `make test`
@@ -26,12 +27,12 @@
 ## Coding conventions
 
 - Language mix noted in the README: JavaScript (5).
-- Use Node 20 or newer for package scripts and repository verification.
+- Use Node 20.19.0 or newer for package scripts and repository verification.
 
 ## Testing guidance
 
 - Test-related files detected: `examples/test.js`, `test/`,
-  `test/http-request.test.js`, `test/scraper.test.js`
+  `test/document.test.js`, `test/http-request.test.js`, `test/scraper.test.js`
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 
@@ -46,7 +47,7 @@
 
 - No required secret or credential file was identified in the repository scan.
 - Keep credentials, private target URLs, captured pages, and environment files out of git.
-- Tests should avoid external requests by injecting fake transport/jsdom dependencies. Network errors should be surfaced to callbacks without reading missing response bodies, non-function callbacks should not throw during async completion, non-object headers should not create numeric header names, and option defaults should not mutate caller inputs. HTTP(S) URI validation should reject non-web schemes, missing HTTP(S) hosts, and HTTP(S) URI credentials before request dispatch. Keep the bounded timeout, public-address checks, bounded redirects, streaming body limit, and parser limit ahead of legacy jsdom.
+- Tests should avoid external requests by injecting fake transport/document dependencies. Network errors should be surfaced to callbacks without reading missing response bodies, non-function callbacks should not throw during async completion, non-object headers should not create numeric header names, and option defaults should not mutate caller inputs. HTTP(S) URI validation should reject non-web schemes, missing HTTP(S) hosts, and HTTP(S) URI credentials before request dispatch. Keep the bounded timeout, public-address checks, bounded redirects, streaming body limit, and parser limit ahead of jsdom. Preserve disabled remote script/resource loading and keep package.json synchronized with package-lock.json.
 - Scraping workflows should respect robots guidance, terms of service, and rate limits.
 - Treat non-positive `reqPerSec` values as a caller mistake rather than a queue-stalling throttle.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.

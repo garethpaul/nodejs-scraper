@@ -1,6 +1,6 @@
 # Maintained Parser And Locked Dependencies
 
-status: planned
+status: completed
 
 ## Problem
 
@@ -37,6 +37,40 @@ surface still comes from vendored jQuery 1.6.1.
 6. Remove the obsolete vendored jQuery file only after the maintained adapter
    passes focused and full verification.
 
+## Work Completed
+
+- Replaced legacy jsdom with exact jsdom 29.1.1 and vendored jQuery 1.6.1 with
+  exact jQuery 4.0.0 through the documented `jquery/factory` API.
+- Added an asynchronous injectable document adapter and preserved the public
+  successful callback's jQuery-compatible `$` function.
+- Added real local-only parser tests and full scraper integration coverage for
+  head/body selection, malformed HTML, inert scripts, disabled resources, and
+  construction errors.
+- Added `package-lock.json`, removed the obsolete vendored asset, and updated
+  hosted validation to install with scripts disabled and audit production
+  dependencies.
+- Updated repository contracts and documentation for Node 20.19.0+, exact
+  dependency installation, and disabled remote parser execution/loading.
+
 ## Verification
 
-- Pending test-first implementation and verification.
+- The initial `node test/document.test.js` run failed because `lib/document.js`
+  did not exist, confirming the test-first boundary.
+- `node test/document.test.js` and `npm test` passed against real jsdom 29.1.1
+  and jQuery 4.0.0 without live network requests.
+- `npm ls request --all` returned an empty dependency tree.
+- `npm audit --omit=dev` reported zero production vulnerabilities.
+- A clean `npm ci --ignore-scripts --no-audit --no-fund` installed the exact
+  40-package production graph from `package-lock.json`.
+- `npm run check`, `make lint`, `make test`, `make build`, `make check`, and
+  `make verify` passed.
+- External `make -f
+  /home/gjones/code/private/repos/garethpaul/nodejs-scraper/Makefile check`
+  passed from `/tmp`.
+- JavaScript syntax checks, Python compilation, `git diff --check`, and
+  `npm pack --dry-run --json` passed; the package artifact excluded generated
+  bytecode and retired vendored jQuery.
+- Eight hostile mutations were rejected: legacy jsdom restoration, request
+  lockfile restoration, script execution, resource loading, missing real
+  parser integration coverage, incomplete plan status, unlocked CI, and
+  vendored jQuery restoration.

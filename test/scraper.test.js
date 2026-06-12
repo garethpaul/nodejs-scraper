@@ -34,19 +34,11 @@ function run(index) {
 	}
 }
 
-function scraperWithRequest(fakeRequest, fakeJsdom) {
+function scraperWithRequest(fakeRequest, fakeCreateDocument) {
 	return scraperModule.createScraper({
 		request: fakeRequest,
-		jsdom: fakeJsdom || {
-			jsdom: function() {
-				return {
-					createWindow: function() {
-						return {};
-					}
-				};
-			},
-			jQueryify: function(window, path, callback) {
-				callback(window, function() {
+		createDocument: fakeCreateDocument || function(body, callback) {
+			callback(null, function() {
 					return {
 						append: function() { return this; },
 						find: function() {
@@ -58,8 +50,7 @@ function scraperWithRequest(fakeRequest, fakeJsdom) {
 						text: function() { return 'Example Domain'; },
 						length: 1
 					};
-				});
-			}
+			});
 		}
 	});
 }
@@ -183,11 +174,9 @@ test('rejects oversized response bodies before parsing', function(done) {
 		process.nextTick(function() {
 			callback(null, { statusCode: 200 }, Buffer.alloc(1024 * 1024 + 1, 'a'));
 		});
-	}, {
-		jsdom: function() {
-			parsed = true;
-			throw new Error('oversized body reached jsdom');
-		}
+	}, function() {
+		parsed = true;
+		throw new Error('oversized body reached parser');
 	});
 
 	scraper('https://example.com', function(err, $) {
@@ -205,11 +194,9 @@ test('measures response body limits in utf8 bytes', function(done) {
 		process.nextTick(function() {
 			callback(null, { statusCode: 200 }, 'éé');
 		});
-	}, {
-		jsdom: function() {
-			parsed = true;
-			throw new Error('oversized body reached jsdom');
-		}
+	}, function() {
+		parsed = true;
+		throw new Error('oversized body reached parser');
 	});
 
 	scraper('https://example.com', function(err) {
@@ -254,17 +241,56 @@ test('rejects unsupported response body types before parsing', function(done) {
 		process.nextTick(function() {
 			callback(null, { statusCode: 200 }, { html: '<body>no</body>' });
 		});
-	}, {
-		jsdom: function() {
-			parsed = true;
-			throw new Error('unsupported body reached jsdom');
-		}
+	}, function() {
+		parsed = true;
+		throw new Error('unsupported body reached parser');
 	});
 
 	scraper('https://example.com', function(err) {
 		assert(err);
 		assert.equal(err.message, 'Response body must be text or a buffer.');
 		assert.equal(parsed, false);
+		done();
+	});
+});
+
+test('reports document parser errors', function(done) {
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><body>broken</body></html>');
+		});
+	}, function(body, callback) {
+		callback(new Error('parser failed'), null);
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert(err);
+		assert.equal(err.message, 'parser failed');
+		assert.equal($, null);
+		done();
+	});
+});
+
+test('parses successful responses with the maintained document adapter', function(done) {
+	var scraper = scraperModule.createScraper({
+		request: function(options, callback) {
+			process.nextTick(function() {
+				callback(null, { statusCode: 200 }, [
+					'<!doctype html><html><head><title>Maintained</title></head>',
+					'<body><main id="content">Ready</main>',
+					'<script>window.__scraperExecuted = true</script></body></html>'
+				].join(''));
+			});
+		}
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert.ifError(err);
+		assert.equal($('title').text(), 'Maintained');
+		assert.equal($('#content').text(), 'Ready');
+		assert.equal($('script').length, 0);
+		assert.equal($('nobreakage').length, 1);
+		assert.equal($('body')[0].ownerDocument.defaultView.__scraperExecuted, undefined);
 		done();
 	});
 });
