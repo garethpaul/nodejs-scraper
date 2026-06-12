@@ -74,3 +74,7 @@ surface still comes from vendored jQuery 1.6.1.
   lockfile restoration, script execution, resource loading, missing real
   parser integration coverage, incomplete plan status, unlocked CI, and
   vendored jQuery restoration.
+- Exact implementation head
+  `c443e15f55ccd29f02e6c4368350821fa4c50d65` passed canonical push Check run
+  `27428808753`, pull-request Check run `27428810003`, and CodeQL run
+  `27428808202` for actions, JavaScript/TypeScript, and Python.
