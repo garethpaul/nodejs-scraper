@@ -7,12 +7,11 @@
   "directories" : { "lib" : "./lib" },
   "main" : "./lib/scraper.js",
   "scripts" : {
-    "test" : "node test/scraper.test.js",
+    "test" : "node test/scraper.test.js && node test/http-request.test.js",
     "check" : "npm test && python3 scripts/check-baseline.py"
   },
   "repository" : { "type":"git", "url":"https://github.com/mape/node-scraper.git" },
   "dependencies" : {
-    "request" : "2.88.2",
     "jsdom" : "0.2.19"
   }
 }

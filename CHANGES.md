@@ -2,6 +2,13 @@
 
 ## 2026-06-12
 
+- Replaced the retired direct `request` dependency with a Node 20 built-in
+  HTTP(S) transport that validates public DNS results on every bounded redirect.
+- Added streaming response limits, redirect credential-header stripping, and
+  no-network coverage for private destinations, timeouts, redirects, and body
+  limits.
+- Made every Make verification alias resolve repository paths from the
+  Makefile, including when invoked from another working directory.
 - Added a 1 MiB default response body parse limit with a finite positive
   `fetchOptions.maxBodyBytes` override.
 - Added no-network coverage for oversized, multibyte, Buffer, unsupported, and

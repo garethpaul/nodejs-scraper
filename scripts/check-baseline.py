@@ -32,9 +32,12 @@ REQUIRED = [
     "docs/plans/2026-06-10-hosted-no-install-validation.md",
     "docs/plans/2026-06-10-request-timeout-default.md",
     "docs/plans/2026-06-12-response-body-parse-limit.md",
+    "docs/plans/2026-06-12-secure-built-in-transport.md",
     "docs/readme-overview.svg",
+    "lib/http-request.js",
     "lib/scraper.js",
     "package.json",
+    "test/http-request.test.js",
     "test/scraper.test.js",
 ]
 
@@ -59,7 +62,7 @@ def main():
 
     package = json.loads(read("package.json"))
     scripts = package.get("scripts", {})
-    if scripts.get("test") != "node test/scraper.test.js":
+    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js":
         failures.append("package.json must expose npm test")
     if "scripts/check-baseline.py" not in scripts.get("check", ""):
         failures.append("package.json must expose npm run check")
@@ -70,18 +73,20 @@ def main():
     if read(".nvmrc").strip() != "20":
         failures.append(".nvmrc must select Node 20")
     dependencies = package.get("dependencies", {})
-    if dependencies.get("request") != "2.88.2":
-        failures.append("package.json must pin request to the documented legacy version")
+    if "request" in dependencies:
+        failures.append("package.json must not restore the retired request dependency")
     if dependencies.get("jsdom") != "0.2.19":
         failures.append("package.json must pin jsdom to the documented legacy API version")
 
     makefile = read("Makefile")
     for phrase in [
         ".PHONY: build check lint static-check test verify",
+        "ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))",
         "check: verify",
         "verify: test static-check",
         "lint build: static-check",
-        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/check-baseline.py",
+        "cd \"$(ROOT)\" && npm test",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) \"$(ROOT)scripts/check-baseline.py\"",
     ]:
         if phrase not in makefile:
             failures.append(f"Makefile must include standard gate alias: {phrase}")
@@ -104,6 +109,7 @@ def main():
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
+        "require('./http-request').createHttpRequest(deps.transport)",
         "typeof callback !== 'function'",
         "isHttpUri(requestOptions['uri'])",
         "http or https uri",
@@ -129,6 +135,27 @@ def main():
         failures.append("scraper must not mutate caller request options while applying defaults")
     if "fetchOptions[key] =" in source:
         failures.append("scraper must not mutate caller fetch options while applying defaults")
+
+    transport = read("lib/http-request.js")
+    for phrase in [
+        "require('dns')",
+        "require('http')",
+        "require('https')",
+        "createPublicLookup",
+        "lookup: lookup",
+        "dispatch(redirectUrl.toString(), redirects + 1, parsed)",
+        "Request host must resolve only to a public network address.",
+        "Request redirect limit of ",
+        "response.destroy()",
+        "Response body exceeds maxBodyBytes limit",
+        "authorization', 'cookie', 'proxy-authorization",
+        "['::ffff:0:0', 96]",
+        "['64:ff9b::', 96]",
+    ]:
+        if phrase not in transport:
+            failures.append(f"built-in transport must include {phrase}")
+    if "require('request')" in source or "require(\"request\")" in source:
+        failures.append("scraper must not restore the retired request transport")
 
     tests = read("test/scraper.test.js")
     for phrase in [
@@ -159,6 +186,21 @@ def main():
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
 
+    transport_tests = read("test/http-request.test.js")
+    for phrase in [
+        "classifies public and blocked IP addresses",
+        "rejects bracketed private IPv6 literals before dispatch",
+        "rejects hostnames resolving to private addresses",
+        "rejects mixed public and private DNS results",
+        "rejects redirects to private addresses",
+        "stops streaming when maxBodyBytes is exceeded",
+        "rejects redirect loops after the configured limit",
+        "uses the bounded default timeout and reports timeout errors",
+        "strips credentials when redirects cross origins",
+    ]:
+        if phrase not in transport_tests:
+            failures.append(f"transport tests must include {phrase}")
+
     for path in ["examples/simple.js", "examples/advanced.js", "examples/parallel.js"]:
         example = read(path)
         if "require('../lib/scraper')" not in example:
@@ -182,7 +224,7 @@ def main():
         "npm run check",
         "external requests",
         "network errors",
-        "request/jsdom",
+        "legacy jsdom",
         "example.test",
         "rate limits",
         "non-positive",
@@ -194,6 +236,9 @@ def main():
         "HTTP(S) hosts",
         "HTTP(S) URI credentials",
         "response body parse limit",
+        "built-in transport",
+        "private network",
+        "bounded redirects",
         "make lint",
         "make test",
         "make build",
@@ -313,6 +358,18 @@ def main():
             "run: node --version" in workflow and
             "run: make check" in workflow):
         failures.append("Check workflow must stay singular, pinned, credential-free, read-only, Node 20, and bounded")
+
+    transport_plan = read("docs/plans/2026-06-12-secure-built-in-transport.md")
+    transport_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", transport_plan)
+    transport_work = markdown_section(transport_plan, "Work Completed")
+    transport_verification = markdown_section(transport_plan, "Verification")
+    if (transport_status != ["completed"] or not transport_work or
+            not transport_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", transport_verification) or
+            "npm test" not in transport_verification or
+            "rejects redirects to private addresses" not in transport_tests or
+            "response.destroy()" not in transport):
+        failures.append("secure built-in transport plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

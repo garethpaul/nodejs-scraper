@@ -4,7 +4,7 @@ This document explains the current state and direction of the project.
 Project overview and developer docs: [`README.md`](README.md)
 
 NodeJS Scraper is a Node module that makes website scraping easier by wrapping
-request fetching with a jQuery-like document interface.
+HTTP(S) fetching with a jQuery-like document interface.
 
 The repository is useful as a legacy scraping utility with simple, advanced, and
 parallel examples plus optional request-rate limiting. Usage details live in
@@ -21,7 +21,9 @@ Priority:
 - Keep rate-limiting behavior visible in examples
 - Keep external examples on reserved `example.test` placeholders
 - Avoid encouraging aggressive scraping or bypassing site rules
-- Maintain package metadata and the pinned legacy `request/jsdom` contract
+- Maintain package metadata and the pinned legacy jsdom contract
+- Keep the Node 20 built-in transport limited to public network destinations
+  across bounded redirects
 - Keep no-network tests for request options and network errors
 - Keep request and fetch option normalization free of caller-visible mutation
 - Keep non-object headers from leaking into normalized request options
@@ -34,7 +36,7 @@ Priority:
 - Keep HTTP(S) URI credentials rejected before request dispatch
 - Keep outbound requests on a 10-second timeout by default while preserving
   finite positive caller overrides
-- Keep a configurable response body parse limit in front of legacy jsdom
+- Keep a configurable streaming and parse limit in front of legacy jsdom
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   local npm/static baseline
 - Keep hosted Linux validation pinned, credential-free, read-only, explicitly
@@ -43,12 +45,12 @@ Priority:
 Next priorities:
 
 - Document Node version and legacy dependency constraints
-- Keep maintenance and verification on Node 20+ while the legacy request/jsdom
-  API is replaced in a dedicated compatibility pass
+- Keep maintenance and verification on Node 20+ while the legacy jsdom API is
+  replaced in a dedicated compatibility pass
 - Add tests around callback ordering and parallel throttling
 - Add broader rate-limit tests for fractional and string `reqPerSec` values
 - Add clearer examples for non-mutating option reuse
-- Modernize request/jsdom dependencies in a dedicated pass
+- Modernize the jsdom dependency in a dedicated pass
 - Clarify robots, terms, and rate-limit expectations for users
 
 Contribution rules:
@@ -64,6 +66,8 @@ Contribution rules:
 - Preserve HTTP(S) URI credentials rejection when changing request dispatch.
 - Preserve the bounded request timeout when changing request normalization.
 - Preserve the response body parse limit when changing scraper parsing.
+- Preserve public-address checks, bounded redirects, and cross-origin header
+  stripping when changing the built-in transport.
 - Run `make lint`, `make test`, `make build`, and `make check` before pushing
   behavior, dependency, or example changes.
 
@@ -81,8 +85,8 @@ of request options before dispatch.
 Outbound requests should retain a bounded default timeout so unavailable
 targets cannot leave work open indefinitely.
 Oversized or unsupported response bodies should fail before legacy jsdom
-parsing, while documentation remains clear that the retired request client
-still buffers callback bodies.
+parsing. The built-in transport should stop reading once the streaming byte
+limit is exceeded.
 
 ## What We Will Not Merge (For Now)
 
