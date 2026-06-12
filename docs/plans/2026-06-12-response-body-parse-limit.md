@@ -50,16 +50,6 @@ and make failure behavior deterministic without changing dependencies.
 - Do not alter non-200 response behavior.
 - Do not add dependencies.
 
-## Verification
-
-- `npm test`
-- `npm run check`
-- `make lint`
-- `make test`
-- `make build`
-- `make check`
-- `git diff --check`
-
 ## Verification Completed
 
 - `node test/scraper.test.js` and `npm test` passed the dependency-injected,
@@ -67,7 +57,20 @@ and make failure behavior deterministic without changing dependencies.
   multibyte strings, raw Buffers, unsupported body types, and parser isolation.
 - `npm run check` passed the static maintenance baseline.
 - `make lint`, `make test`, `make build`, and `make check` all passed.
+- `python3 -m py_compile scripts/check-baseline.py` passed.
 - `git diff --check` passed.
+- Canonical push run `27396254088` and pull-request run `27396255285`
+  completed successfully at exact head
+  `360214faeec11e867e19b98ccbbaf8c63d4a11f7`.
+- Hostile mutations confirmed the checker rejects an incomplete status,
+  unfinished verification, altered run evidence, a missing 1 MiB default, and
+  missing parser-isolation coverage.
+- The implementation preserves `'maxBodyBytes': 1024 * 1024`,
+  `Buffer.byteLength(body, 'utf8')`, and
+  `Response body exceeds maxBodyBytes limit`.
+- `rejects oversized response bodies before parsing` and
+  `rejects unsupported response body types before parsing` prove jsdom is not
+  invoked for rejected bodies.
 
 ## Work Completed
 

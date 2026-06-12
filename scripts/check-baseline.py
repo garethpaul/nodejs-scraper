@@ -39,6 +39,14 @@ REQUIRED = [
 ]
 
 
+def markdown_section(text, heading):
+    match = re.search(
+        rf"(?ms)^## {re.escape(heading)}\s*$\n(.*?)(?=^## |\Z)",
+        text,
+    )
+    return match.group(1).strip() if match else ""
+
+
 def read(relative_path):
     return (ROOT / relative_path).read_text(encoding="utf-8", errors="replace")
 
@@ -237,19 +245,38 @@ def main():
         failures.append("request timeout plan must record completed status and verification")
 
     body_limit_plan = read("docs/plans/2026-06-12-response-body-parse-limit.md")
-    for expected in [
-        "status: completed",
-        "1 MiB",
-        "finite positive",
-        "String and Buffer",
-        "without invoking jsdom",
-        "must not include response contents",
-        "make check",
-    ]:
-        if expected not in body_limit_plan:
-            failures.append(f"response body parse limit plan must record {expected}")
-    if "Do not claim to bound network buffering" not in body_limit_plan:
+    body_limit_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", body_limit_plan)
+    body_limit_work = markdown_section(body_limit_plan, "Work Completed")
+    body_limit_verification = markdown_section(body_limit_plan, "Verification Completed")
+    if body_limit_status != ["completed"] or not body_limit_work:
+        failures.append("response body parse limit plan must record one completed status and completed work")
+    if not body_limit_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", body_limit_verification
+    ):
         failures.append("response body parse limit plan must record completed status and verification")
+    for expected in [
+        "node test/scraper.test.js",
+        "npm test",
+        "npm run check",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "python3 -m py_compile scripts/check-baseline.py",
+        "git diff --check",
+        "27396254088",
+        "27396255285",
+        "360214faeec11e867e19b98ccbbaf8c63d4a11f7",
+        "'maxBodyBytes': 1024 * 1024",
+        "Buffer.byteLength(body, 'utf8')",
+        "Response body exceeds maxBodyBytes limit",
+        "rejects oversized response bodies before parsing",
+        "rejects unsupported response body types before parsing",
+    ]:
+        if expected not in body_limit_verification:
+            failures.append(f"response body parse limit verification must record {expected}")
+    if "Do not claim to bound network buffering" not in body_limit_plan:
+        failures.append("response body parse limit plan must retain the network-buffering boundary")
 
     node20_plan = read("docs/plans/2026-06-10-node20-toolchain.md")
     if "status: completed" not in node20_plan or "Node 20" not in node20_plan or "make check" not in node20_plan:
