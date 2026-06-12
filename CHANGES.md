@@ -2,6 +2,19 @@
 
 ## 2026-06-12
 
+- Replaced legacy jsdom and vendored jQuery 1.6.1 with exact jsdom 29.1.1 and
+  jQuery 4.0.0 dependencies behind an injectable document adapter.
+- Added `package-lock.json`, real no-network parser integration tests, locked
+  hosted installation, and a production dependency audit with zero findings.
+- Replaced the retired direct `request` dependency with a Node 20 built-in
+  HTTP(S) transport that validates public DNS results on every bounded redirect.
+- Added streaming response limits, redirect credential-header stripping, and
+  no-network coverage for private destinations, timeouts, redirects, and body
+  limits.
+- Made every Make verification alias resolve repository paths from the
+  Makefile, including when invoked from another working directory.
+- Updated the immutable `actions/setup-node` pin to v6.4.0 so hosted checks use
+  the supported Node 24 action runtime while continuing to test Node.js 20.
 - Added a 1 MiB default response body parse limit with a finite positive
   `fetchOptions.maxBodyBytes` override.
 - Added no-network coverage for oversized, multibyte, Buffer, unsupported, and
@@ -9,8 +22,11 @@
 
 ## 2026-06-10
 
-- Added pinned, read-only hosted validation for dependency-injected tests and
-  static checks without installing the unlocked legacy dependency tree.
+- Raised the maintained runtime contract from Node 6 to Node 20+ and added an
+  `.nvmrc`, while keeping the legacy request/jsdom migration separately scoped.
+- Added pinned, credential-free, read-only hosted validation on Node 20 for
+  dependency-injected tests and static checks without installing the unlocked
+  legacy dependency tree.
 - Added a header injection guard so CR/LF-bearing request header names and
   values are dropped during normalization.
 - Added a 10-second request timeout default with finite positive caller

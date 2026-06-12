@@ -58,8 +58,13 @@ Outbound requests use a 10-second timeout by default so an unresponsive target
 cannot hold a request open indefinitely. Callers may supply a finite positive
 timeout; invalid values fall back to the bounded default.
 Keep the response body parse limit enabled so oversized or unsupported content
-cannot enter legacy jsdom; this boundary does not eliminate buffering in the
-retired request client.
+cannot enter jsdom. The built-in transport enforces the same limit while
+streaming so the response is not fully buffered first.
+The built-in transport must reject private network, loopback, link-local,
+reserved, multicast, documentation, IPv4-mapped, and translation-prefix
+destinations after DNS resolution and on every bounded redirect. Cross-origin
+redirects must not forward authorization, cookie, or proxy authorization
+headers.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 
@@ -67,14 +72,19 @@ not send traffic to retired third-party endpoints.
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
-The current manifest pins a legacy `request/jsdom` API contract for
-deterministic maintenance. Modernizing either package should be treated as a
-security-sensitive compatibility change and verified with `npm run check`,
-`make lint`, `make test`, `make build`, and `make check`.
+The manifest and lockfile pin jsdom 29.1.1 and jQuery 4.0.0; the default fetch
+path uses the Node 20 built-in HTTP(S) transport. Parser or transport changes
+are security-sensitive and must be verified with `npm ci`, `npm audit
+--omit=dev`, `npm run check`, and every Make gate. Keep jsdom script execution
+and external resource loading disabled for untrusted remote HTML.
+Maintenance and verification require Node 20 or newer; Node 6 is unsupported
+and must not be used as a production or security-testing runtime.
+Hosted verification pins Node 20 and disables checkout credential persistence;
+it does not install the unlocked legacy dependency tree or make live requests.
 
-The pinned Linux workflow runs dependency-injected tests without `npm install`,
-external requests, or live scraping. Installing the legacy dependency tree
-remains a separate modernization task until a lockfile is committed.
+The pinned Linux workflow installs the exact lockfile with package scripts
+disabled, audits production dependencies, and runs local-only parser plus
+dependency-injected transport tests without live scraping.
 
 ## Safe Research Guidelines
 
