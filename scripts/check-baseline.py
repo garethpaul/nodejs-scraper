@@ -334,7 +334,7 @@ def main():
     actions = re.findall(r"(?m)^\s*(?:-\s*)?uses:\s*(\S+)(?:\s+#.*)?$", workflow)
     expected_actions = [
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
-        "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
         "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
     ]
     checkout_step = re.search(

@@ -9,6 +9,8 @@
   limits.
 - Made every Make verification alias resolve repository paths from the
   Makefile, including when invoked from another working directory.
+- Updated the immutable `actions/setup-node` pin to v6.4.0 so hosted checks use
+  the supported Node 24 action runtime while continuing to test Node.js 20.
 - Added a 1 MiB default response body parse limit with a finite positive
   `fetchOptions.maxBodyBytes` override.
 - Added no-network coverage for oversized, multibyte, Buffer, unsupported, and

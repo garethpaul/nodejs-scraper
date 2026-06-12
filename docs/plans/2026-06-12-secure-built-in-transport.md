@@ -39,6 +39,9 @@ retains both redirect/private-network and transport-memory risks.
   that installation-only debt remains part of the parser migration.
 - Made the Make gates resolve the repository root after external verification
   exposed a working-directory assumption.
+- Updated `actions/setup-node` to the verified v6.4.0 commit after hosted
+  verification warned that the prior action runtime would be force-migrated on
+  June 16, 2026; the tested project runtime remains Node.js 20.
 
 ## Verification
 
