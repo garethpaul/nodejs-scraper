@@ -12,6 +12,7 @@ migration.
 
 - Require Node 20 or newer in package metadata.
 - Add `.nvmrc` for a reproducible local major version.
+- Pin Node 20 explicitly in hosted no-install validation.
 - Keep the dependency-injected test and static-contract gates runnable without network access.
 - Preserve pinned legacy request/jsdom versions until their APIs are replaced in a dedicated change.
 

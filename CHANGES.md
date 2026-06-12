@@ -1,11 +1,23 @@
 # Changes
 
+## 2026-06-12
+
+- Added a 1 MiB default response body parse limit with a finite positive
+  `fetchOptions.maxBodyBytes` override.
+- Added no-network coverage for oversized, multibyte, Buffer, unsupported, and
+  invalid-limit response body cases before legacy jsdom parsing.
+
 ## 2026-06-10
 
 - Raised the maintained runtime contract from Node 6 to Node 20+ and added an
   `.nvmrc`, while keeping the legacy request/jsdom migration separately scoped.
+- Added pinned, credential-free, read-only hosted validation on Node 20 for
+  dependency-injected tests and static checks without installing the unlocked
+  legacy dependency tree.
 - Added a header injection guard so CR/LF-bearing request header names and
   values are dropped during normalization.
+- Added a 10-second request timeout default with finite positive caller
+  overrides and fallback for invalid timeout values.
 
 ## 2026-06-08
 

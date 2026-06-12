@@ -34,10 +34,10 @@ function run(index) {
 	}
 }
 
-function scraperWithRequest(fakeRequest) {
+function scraperWithRequest(fakeRequest, fakeJsdom) {
 	return scraperModule.createScraper({
 		request: fakeRequest,
-		jsdom: {
+		jsdom: fakeJsdom || {
 			jsdom: function() {
 				return {
 					createWindow: function() {
@@ -68,8 +68,53 @@ test('normalizes string request options', function(done) {
 	var options = scraperModule.normalizeRequestOptions('https://example.com');
 
 	assert.equal(options.uri, 'https://example.com');
+	assert.equal(options.timeout, 10000);
 	assert.equal(options.headers['User-Agent'], 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)');
 	done();
+});
+
+test('normalizes request timeouts', function(done) {
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: 2500
+	}).timeout, 2500);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: '1500'
+	}).timeout, 1500);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: 0
+	}).timeout, 10000);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: Infinity
+	}).timeout, 10000);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: true
+	}).timeout, 10000);
+	assert.equal(scraperModule.normalizeRequestOptions({
+		uri: 'https://example.com',
+		timeout: '   '
+	}).timeout, 10000);
+	done();
+});
+
+test('dispatches bounded request timeouts', function(done) {
+	var receivedOptions;
+	var scraper = scraperWithRequest(function(options, callback) {
+		receivedOptions = options;
+		process.nextTick(function() {
+			callback(new Error('network failed'), null, undefined);
+		});
+	});
+
+	scraper('https://example.com', function(err) {
+		assert(err);
+		assert.equal(receivedOptions.timeout, 10000);
+		done();
+	});
 });
 
 test('does not mutate request options', function(done) {
@@ -130,6 +175,126 @@ test('does not mutate fetch options', function(done) {
 		assert.equal(fetchOptions.reqPerSec, undefined);
 		done();
 	}, fetchOptions);
+});
+
+test('rejects oversized response bodies before parsing', function(done) {
+	var parsed = false;
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, Buffer.alloc(1024 * 1024 + 1, 'a'));
+		});
+	}, {
+		jsdom: function() {
+			parsed = true;
+			throw new Error('oversized body reached jsdom');
+		}
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert(err);
+		assert.equal(err.message, 'Response body exceeds maxBodyBytes limit of 1048576 bytes.');
+		assert.equal($, null);
+		assert.equal(parsed, false);
+		done();
+	});
+});
+
+test('measures response body limits in utf8 bytes', function(done) {
+	var parsed = false;
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, 'éé');
+		});
+	}, {
+		jsdom: function() {
+			parsed = true;
+			throw new Error('oversized body reached jsdom');
+		}
+	});
+
+	scraper('https://example.com', function(err) {
+		assert(err);
+		assert.equal(err.message, 'Response body exceeds maxBodyBytes limit of 3 bytes.');
+		assert.equal(parsed, false);
+		done();
+	}, { maxBodyBytes: 3 });
+});
+
+test('accepts buffer response bodies within the parse limit', function(done) {
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, Buffer.from('<html><head></head><body>ok</body></html>'));
+		});
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert.ifError(err);
+		assert($);
+		done();
+	}, { maxBodyBytes: 1024 });
+});
+
+test('measures buffer limits before utf8 decoding', function(done) {
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, Buffer.from([0xff, 0xff]));
+		});
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert.ifError(err);
+		assert($);
+		done();
+	}, { maxBodyBytes: 2 });
+});
+
+test('rejects unsupported response body types before parsing', function(done) {
+	var parsed = false;
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, { html: '<body>no</body>' });
+		});
+	}, {
+		jsdom: function() {
+			parsed = true;
+			throw new Error('unsupported body reached jsdom');
+		}
+	});
+
+	scraper('https://example.com', function(err) {
+		assert(err);
+		assert.equal(err.message, 'Response body must be text or a buffer.');
+		assert.equal(parsed, false);
+		done();
+	});
+});
+
+test('falls back to the default parse limit for invalid overrides', function(done) {
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><head></head><body>ok</body></html>');
+		});
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert.ifError(err);
+		assert($);
+		done();
+	}, { maxBodyBytes: 0 });
+});
+
+test('does not coerce boolean parse limits', function(done) {
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><head></head><body>ok</body></html>');
+		});
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert.ifError(err);
+		assert($);
+		done();
+	}, { maxBodyBytes: true });
 });
 
 test('reports missing uri without calling request', function(done) {

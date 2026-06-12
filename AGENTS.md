@@ -26,7 +26,7 @@
 ## Coding conventions
 
 - Language mix noted in the README: JavaScript (5).
-- Use Node >=6 for package scripts.
+- Use Node 20 or newer for package scripts and repository verification.
 
 ## Testing guidance
 
@@ -45,7 +45,7 @@
 
 - No required secret or credential file was identified in the repository scan.
 - Keep credentials, private target URLs, captured pages, and environment files out of git.
-- Tests should avoid external requests by injecting fake request/jsdom dependencies. Network errors should be surfaced to callbacks without reading missing response bodies, non-function callbacks should not throw during async completion, non-object headers should not create numeric header names, and option defaults should not mutate caller inputs. HTTP(S) URI validation should reject non-web schemes, missing HTTP(S) hosts, and HTTP(S) URI credentials before request dispatch.
+- Tests should avoid external requests by injecting fake request/jsdom dependencies. Network errors should be surfaced to callbacks without reading missing response bodies, non-function callbacks should not throw during async completion, non-object headers should not create numeric header names, and option defaults should not mutate caller inputs. HTTP(S) URI validation should reject non-web schemes, missing HTTP(S) hosts, and HTTP(S) URI credentials before request dispatch. Keep the bounded timeout and response-body parse limit ahead of legacy jsdom, without claiming the retired request client stops buffering network responses.
 - Scraping workflows should respect robots guidance, terms of service, and rate limits.
 - Treat non-positive `reqPerSec` values as a caller mistake rather than a queue-stalling throttle.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.

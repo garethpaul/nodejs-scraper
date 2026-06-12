@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import json
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -11,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     ".gitignore",
     ".nvmrc",
+    ".github/workflows/check.yml",
     "CHANGES.md",
     "Makefile",
     "README.md",
@@ -27,6 +29,9 @@ REQUIRED = [
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-10-header-injection-guard.md",
     "docs/plans/2026-06-10-node20-toolchain.md",
+    "docs/plans/2026-06-10-hosted-no-install-validation.md",
+    "docs/plans/2026-06-10-request-timeout-default.md",
+    "docs/plans/2026-06-12-response-body-parse-limit.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -79,7 +84,10 @@ def main():
         "function normalizeHeaders",
         "function isSafeHeader",
         "function normalizeRequestOptions",
+        "function normalizeRequestTimeout",
         "function normalizeReqPerSec",
+        "function normalizeMaxBodyBytes",
+        "function normalizeResponseBody",
         "function isHttpUri",
         "require('url')",
         "url.parse(uri)",
@@ -95,7 +103,14 @@ def main():
         "String(value).indexOf('\\r')",
         "String(value).indexOf('\\n')",
         "var reqPerSec = normalizeReqPerSec",
-        "body = (body || '').replace",
+        "'timeout': 10000",
+        "'maxBodyBytes': 1024 * 1024",
+        "normalized.timeout = normalizeRequestTimeout(requestOptions.timeout)",
+        "typeof value !== 'number' && typeof value !== 'string'",
+        "body = normalizedBody.body.replace",
+        "Buffer.byteLength(body, 'utf8')",
+        "Response body must be text or a buffer.",
+        "Response body exceeds maxBodyBytes limit",
         "return;",
     ]:
         if phrase not in source:
@@ -110,6 +125,8 @@ def main():
     tests = read("test/scraper.test.js")
     for phrase in [
         "normalizes string request options",
+        "normalizes request timeouts",
+        "dispatches bounded request timeouts",
         "does not mutate request options",
         "ignores non-object request headers",
         "drops unsafe request headers",
@@ -123,6 +140,13 @@ def main():
         "does not skip queued requests",
         "does not stall queued requests for non-positive reqPerSec",
         "treats non-function callbacks as no-op",
+        "rejects oversized response bodies before parsing",
+        "measures response body limits in utf8 bytes",
+        "accepts buffer response bodies within the parse limit",
+        "measures buffer limits before utf8 decoding",
+        "rejects unsupported response body types before parsing",
+        "falls back to the default parse limit for invalid overrides",
+        "does not coerce boolean parse limits",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -161,6 +185,7 @@ def main():
         "HTTP(S)",
         "HTTP(S) hosts",
         "HTTP(S) URI credentials",
+        "response body parse limit",
         "make lint",
         "make test",
         "make build",
@@ -205,6 +230,62 @@ def main():
     header_injection_plan = header_injection_plan_path.read_text(encoding="utf-8") if header_injection_plan_path.exists() else ""
     if "status: completed" not in header_injection_plan or "header injection guard" not in header_injection_plan.lower():
         failures.append("header injection guard plan must record completed status and verification")
+
+    timeout_plan_path = ROOT / "docs/plans/2026-06-10-request-timeout-default.md"
+    timeout_plan = timeout_plan_path.read_text(encoding="utf-8") if timeout_plan_path.exists() else ""
+    if "status: completed" not in timeout_plan or "10-second request timeout" not in timeout_plan.lower():
+        failures.append("request timeout plan must record completed status and verification")
+
+    body_limit_plan = read("docs/plans/2026-06-12-response-body-parse-limit.md")
+    for expected in [
+        "status: completed",
+        "1 MiB",
+        "finite positive",
+        "String and Buffer",
+        "without invoking jsdom",
+        "must not include response contents",
+        "make check",
+    ]:
+        if expected not in body_limit_plan:
+            failures.append(f"response body parse limit plan must record {expected}")
+    if "Do not claim to bound network buffering" not in body_limit_plan:
+        failures.append("response body parse limit plan must record completed status and verification")
+
+    node20_plan = read("docs/plans/2026-06-10-node20-toolchain.md")
+    if "status: completed" not in node20_plan or "Node 20" not in node20_plan or "make check" not in node20_plan:
+        failures.append("Node 20 toolchain plan must record completed status and verification")
+
+    hosted_plan = read("docs/plans/2026-06-10-hosted-no-install-validation.md")
+    workflow = read(".github/workflows/check.yml")
+    if "status: completed" not in hosted_plan or "make check" not in hosted_plan:
+        failures.append("hosted no-install validation plan must record status and verification")
+    actions = re.findall(r"(?m)^\s*(?:-\s*)?uses:\s*(\S+)(?:\s+#.*)?$", workflow)
+    expected_actions = [
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+    ]
+    checkout_step = re.search(
+        r"(?m)^      - name: Check out repository\n"
+        r"        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6\.0\.3\n"
+        r"        with:\n"
+        r"          persist-credentials: false\n",
+        workflow,
+    )
+    if not (checkout_step is not None and
+            actions == expected_actions and
+            workflow.count("persist-credentials:") == 1 and
+            workflow.count("permissions:") == 1 and
+            re.search(r"(?m)^\s+[A-Za-z-]+:\s+write\s*$", workflow) is None and
+            "permissions:\n  contents: read" in workflow and
+            "cancel-in-progress: true" in workflow and
+            "runs-on: ubuntu-24.04" in workflow and
+            "timeout-minutes: 10" in workflow and
+            "node-version: \"20\"" in workflow and
+            'python-version: "3.12"' in workflow and
+            "run: node --version" in workflow and
+            "run: make check" in workflow):
+        failures.append("Check workflow must stay singular, pinned, credential-free, read-only, Node 20, and bounded")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

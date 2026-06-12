@@ -54,6 +54,12 @@ HTTP(S) hosts should be required before dispatch so malformed HTTP URLs do not
 reach the request client.
 HTTP(S) URI credentials should be rejected before dispatch so credential-bearing
 URLs do not reach the request client.
+Outbound requests use a 10-second timeout by default so an unresponsive target
+cannot hold a request open indefinitely. Callers may supply a finite positive
+timeout; invalid values fall back to the bounded default.
+Keep the response body parse limit enabled so oversized or unsupported content
+cannot enter legacy jsdom; this boundary does not eliminate buffering in the
+retired request client.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 
@@ -67,6 +73,12 @@ security-sensitive compatibility change and verified with `npm run check`,
 `make lint`, `make test`, `make build`, and `make check`.
 Maintenance and verification require Node 20 or newer; Node 6 is unsupported
 and must not be used as a production or security-testing runtime.
+Hosted verification pins Node 20 and disables checkout credential persistence;
+it does not install the unlocked legacy dependency tree or make live requests.
+
+The pinned Linux workflow runs dependency-injected tests without `npm install`,
+external requests, or live scraping. Installing the legacy dependency tree
+remains a separate modernization task until a lockfile is committed.
 
 ## Safe Research Guidelines
 
