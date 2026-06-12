@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-12
+
+- Added a 1 MiB default response body parse limit with a finite positive
+  `fetchOptions.maxBodyBytes` override.
+- Added no-network coverage for oversized, multibyte, Buffer, unsupported, and
+  invalid-limit response body cases before legacy jsdom parsing.
+
 ## 2026-06-10
 
 - Added pinned, read-only hosted validation for dependency-injected tests and

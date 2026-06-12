@@ -75,6 +75,9 @@ The manifest declares `node >=6` to match the pinned `request` package.
   contain CR/LF characters before dispatch.
 - Requests use a 10-second timeout by default. A finite positive `timeout`
   option overrides that default; invalid timeout values fall back to it.
+- Successful response bodies use a 1 MiB parse limit by default. A finite
+  positive `fetchOptions.maxBodyBytes` value overrides it; oversized or
+  unsupported body types fail before legacy jsdom parsing.
 - Missing or non-function callbacks are treated as no-ops.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
@@ -114,6 +117,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   option defaults should not mutate caller inputs. HTTP(S) URI validation should
   reject non-web schemes, missing HTTP(S) hosts, and HTTP(S) URI credentials
   before request dispatch.
+- The response body parse limit bounds content entering legacy jsdom but does
+  not claim to prevent the retired request client from buffering the response.
 - The header injection guard should keep unsafe CR/LF header names and values
   out of normalized request options.
 - Keep the default request timeout bounded when callers omit or provide an

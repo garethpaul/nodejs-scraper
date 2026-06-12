@@ -34,6 +34,7 @@ Priority:
 - Keep HTTP(S) URI credentials rejected before request dispatch
 - Keep outbound requests on a 10-second timeout by default while preserving
   finite positive caller overrides
+- Keep a configurable response body parse limit in front of legacy jsdom
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
   local npm/static baseline
 - Keep hosted Linux validation pinned, read-only, and independent of legacy
@@ -60,6 +61,7 @@ Contribution rules:
 - Preserve HTTP(S) host validation when changing request dispatch.
 - Preserve HTTP(S) URI credentials rejection when changing request dispatch.
 - Preserve the bounded request timeout when changing request normalization.
+- Preserve the response body parse limit when changing scraper parsing.
 - Run `make lint`, `make test`, `make build`, and `make check` before pushing
   behavior, dependency, or example changes.
 
@@ -76,6 +78,9 @@ The header injection guard should keep CR/LF-bearing header names and values out
 of request options before dispatch.
 Outbound requests should retain a bounded default timeout so unavailable
 targets cannot leave work open indefinitely.
+Oversized or unsupported response bodies should fail before legacy jsdom
+parsing, while documentation remains clear that the retired request client
+still buffers callback bodies.
 
 ## What We Will Not Merge (For Now)
 

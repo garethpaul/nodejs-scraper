@@ -57,6 +57,9 @@ URLs do not reach the request client.
 Outbound requests use a 10-second timeout by default so an unresponsive target
 cannot hold a request open indefinitely. Callers may supply a finite positive
 timeout; invalid values fall back to the bounded default.
+Keep the response body parse limit enabled so oversized or unsupported content
+cannot enter legacy jsdom; this boundary does not eliminate buffering in the
+retired request client.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

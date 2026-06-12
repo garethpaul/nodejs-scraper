@@ -28,6 +28,7 @@ REQUIRED = [
     "docs/plans/2026-06-10-header-injection-guard.md",
     "docs/plans/2026-06-10-hosted-no-install-validation.md",
     "docs/plans/2026-06-10-request-timeout-default.md",
+    "docs/plans/2026-06-12-response-body-parse-limit.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -80,6 +81,8 @@ def main():
         "function normalizeRequestOptions",
         "function normalizeRequestTimeout",
         "function normalizeReqPerSec",
+        "function normalizeMaxBodyBytes",
+        "function normalizeResponseBody",
         "function isHttpUri",
         "require('url')",
         "url.parse(uri)",
@@ -96,9 +99,13 @@ def main():
         "String(value).indexOf('\\n')",
         "var reqPerSec = normalizeReqPerSec",
         "'timeout': 10000",
+        "'maxBodyBytes': 1024 * 1024",
         "normalized.timeout = normalizeRequestTimeout(requestOptions.timeout)",
         "typeof value !== 'number' && typeof value !== 'string'",
-        "body = (body || '').replace",
+        "body = normalizedBody.body.replace",
+        "Buffer.byteLength(body, 'utf8')",
+        "Response body must be text or a buffer.",
+        "Response body exceeds maxBodyBytes limit",
         "return;",
     ]:
         if phrase not in source:
@@ -128,6 +135,13 @@ def main():
         "does not skip queued requests",
         "does not stall queued requests for non-positive reqPerSec",
         "treats non-function callbacks as no-op",
+        "rejects oversized response bodies before parsing",
+        "measures response body limits in utf8 bytes",
+        "accepts buffer response bodies within the parse limit",
+        "measures buffer limits before utf8 decoding",
+        "rejects unsupported response body types before parsing",
+        "falls back to the default parse limit for invalid overrides",
+        "does not coerce boolean parse limits",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -166,6 +180,7 @@ def main():
         "HTTP(S)",
         "HTTP(S) hosts",
         "HTTP(S) URI credentials",
+        "response body parse limit",
         "make lint",
         "make test",
         "make build",
@@ -215,6 +230,10 @@ def main():
     timeout_plan = timeout_plan_path.read_text(encoding="utf-8") if timeout_plan_path.exists() else ""
     if "status: completed" not in timeout_plan or "10-second request timeout" not in timeout_plan.lower():
         failures.append("request timeout plan must record completed status and verification")
+
+    body_limit_plan = read("docs/plans/2026-06-12-response-body-parse-limit.md")
+    if "status: completed" not in body_limit_plan or "1 MiB" not in body_limit_plan or "make check" not in body_limit_plan:
+        failures.append("response body parse limit plan must record completed status and verification")
 
     hosted_plan = read("docs/plans/2026-06-10-hosted-no-install-validation.md")
     workflow = read(".github/workflows/check.yml")
