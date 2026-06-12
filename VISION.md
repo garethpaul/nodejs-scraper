@@ -38,6 +38,8 @@ Priority:
 Next priorities:
 
 - Document Node version and legacy dependency constraints
+- Keep maintenance and verification on Node 20+ while the legacy request/jsdom
+  API is replaced in a dedicated compatibility pass
 - Add tests around callback ordering and parallel throttling
 - Add broader rate-limit tests for fractional and string `reqPerSec` values
 - Add clearer examples for non-mutating option reuse

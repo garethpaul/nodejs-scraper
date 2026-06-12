@@ -65,6 +65,8 @@ The current manifest pins a legacy `request/jsdom` API contract for
 deterministic maintenance. Modernizing either package should be treated as a
 security-sensitive compatibility change and verified with `npm run check`,
 `make lint`, `make test`, `make build`, and `make check`.
+Maintenance and verification require Node 20 or newer; Node 6 is unsupported
+and must not be used as a production or security-testing runtime.
 
 ## Safe Research Guidelines
 

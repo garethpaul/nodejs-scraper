@@ -3,7 +3,7 @@
   "description" : "Easier web scraping using jQuery.",
   "version" : "0.0.9",
   "author" : "Mathias Pettersson <mape@mape.me>",
-  "engines" : { "node" : ">=6" },
+  "engines" : { "node" : ">=20" },
   "directories" : { "lib" : "./lib" },
   "main" : "./lib/scraper.js",
   "scripts" : {

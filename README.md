@@ -55,7 +55,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 This package intentionally pins a legacy `request/jsdom` pair because the
 current scraper API depends on old jsdom helpers. Treat `npm install` as a
 legacy-runtime workflow until the jsdom integration is modernized.
-The manifest declares `node >=6` to match the pinned `request` package.
+Repository maintenance and verification require Node 20 or newer; `.nvmrc`
+selects Node 20 for local use. The pinned `request/jsdom` pair remains a legacy
+API compatibility boundary and should be replaced separately rather than used
+as a reason to run the project on an unsupported Node release.
 
 ## Running or Using the Project
 

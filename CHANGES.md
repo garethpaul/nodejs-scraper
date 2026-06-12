@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Raised the maintained runtime contract from Node 6 to Node 20+ and added an
+  `.nvmrc`, while keeping the legacy request/jsdom migration separately scoped.
 - Added a header injection guard so CR/LF-bearing request header names and
   values are dropped during normalization.
 

@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     ".gitignore",
+    ".nvmrc",
     "CHANGES.md",
     "Makefile",
     "README.md",
@@ -25,6 +26,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-http-uri-credential-validation.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-10-header-injection-guard.md",
+    "docs/plans/2026-06-10-node20-toolchain.md",
     "docs/readme-overview.svg",
     "lib/scraper.js",
     "package.json",
@@ -50,8 +52,10 @@ def main():
         failures.append("package.json must expose npm run check")
     if package.get("main") != "./lib/scraper.js":
         failures.append("package.json main must point at ./lib/scraper.js")
-    if package.get("engines") != {"node": ">=6"}:
-        failures.append("package.json must match the pinned request engine baseline")
+    if package.get("engines") != {"node": ">=20"}:
+        failures.append("package.json must require the maintained Node 20+ toolchain")
+    if read(".nvmrc").strip() != "20":
+        failures.append(".nvmrc must select Node 20")
     dependencies = package.get("dependencies", {})
     if dependencies.get("request") != "2.88.2":
         failures.append("package.json must pin request to the documented legacy version")
