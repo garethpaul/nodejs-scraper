@@ -57,3 +57,7 @@ retains both redirect/private-network and transport-memory risks.
   restoring the retired default client, removing socket DNS policy, removing
   streaming termination, removing private-redirect coverage, reverting plan
   completion, and removing Makefile root resolution.
+- Exact implementation head
+  `09860dc686ce29247d543c9bf3d042853ade921a` passed canonical push Check run
+  `27428350128`, pull-request Check run `27428349984`, and CodeQL run
+  `27428348464` for actions, JavaScript/TypeScript, and Python.
