@@ -60,6 +60,15 @@ and make failure behavior deterministic without changing dependencies.
 - `make check`
 - `git diff --check`
 
+## Verification Completed
+
+- `node test/scraper.test.js` and `npm test` passed the dependency-injected,
+  no-network scraper suite, including default and overridden byte limits,
+  multibyte strings, raw Buffers, unsupported body types, and parser isolation.
+- `npm run check` passed the static maintenance baseline.
+- `make lint`, `make test`, `make build`, and `make check` all passed.
+- `git diff --check` passed.
+
 ## Work Completed
 
 - Added a 1 MiB default parse limit and finite positive override normalization.
