@@ -34,6 +34,7 @@ REQUIRED = [
     "docs/plans/2026-06-12-response-body-parse-limit.md",
     "docs/plans/2026-06-12-maintained-parser-lockfile.md",
     "docs/plans/2026-06-12-secure-built-in-transport.md",
+    "docs/plans/2026-06-13-rate-limit-scheduling.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -133,6 +134,10 @@ def main():
         "String(value).indexOf('\\r')",
         "String(value).indexOf('\\n')",
         "var reqPerSec = normalizeReqPerSec",
+        "var schedule = deps.schedule || setTimeout",
+        "var maxScheduleDelay = 2147483647",
+        "scheduleNextFetch(timeSpacing)",
+        "Math.min(delay, maxScheduleDelay)",
         "'timeout': 10000",
         "'maxBodyBytes': 1024 * 1024",
         "normalized.timeout = normalizeRequestTimeout(requestOptions.timeout)",
@@ -151,6 +156,10 @@ def main():
         failures.append("scraper must not mutate caller request options while applying defaults")
     if "fetchOptions[key] =" in source:
         failures.append("scraper must not mutate caller fetch options while applying defaults")
+    if "setTimeout(runNextFetch, timeSpacing)" in source or "schedule(runNextFetch, timeSpacing)" in source:
+        failures.append("throttled dispatch must use the injected request-start scheduler")
+    if "concurrentConnections" in source:
+        failures.append("throttled dispatch must not restore initial request bursts")
 
     transport = read("lib/http-request.js")
     for phrase in [
@@ -205,6 +214,10 @@ def main():
         "handles non-200 responses",
         "does not skip queued requests",
         "does not stall queued requests for non-positive reqPerSec",
+        "spaces integer reqPerSec request starts without waiting for completion",
+        "supports fractional and numeric-string reqPerSec spacing",
+        "chunks reqPerSec spacing beyond the maximum timer delay",
+        "treats invalid reqPerSec strings as unthrottled",
         "treats non-function callbacks as no-op",
         "rejects oversized response bodies before parsing",
         "measures response body limits in utf8 bytes",
@@ -263,7 +276,9 @@ def main():
         if expected not in gitignore:
             failures.append(f".gitignore must include {expected}")
 
-    docs = "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md"])
+    docs = " ".join("\n".join(
+        read(path) for path in ["README.md", "SECURITY.md", "VISION.md"]
+    ).split())
     for phrase in [
         "npm run check",
         "external requests",
@@ -276,6 +291,10 @@ def main():
         "rate limits",
         "non-positive",
         "reqPerSec",
+        "space request starts at `1000 / reqPerSec`",
+        "later starts do not wait for earlier responses",
+        "must not create an initial or completion-driven burst",
+        "spacing request starts independently of remote response completion",
         "non-function callbacks",
         "non-object headers",
         "header injection guard",
@@ -430,6 +449,32 @@ def main():
             "npm test" not in parser_verification or
             "npm audit --omit=dev" not in parser_verification):
         failures.append("maintained parser plan must record completed status and verification")
+
+    scheduling_plan = read("docs/plans/2026-06-13-rate-limit-scheduling.md")
+    scheduling_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", scheduling_plan)
+    scheduling_work = markdown_section(scheduling_plan, "Work Completed")
+    scheduling_verification = markdown_section(scheduling_plan, "Verification Completed")
+    if scheduling_status != ["completed"] or not scheduling_work:
+        failures.append("rate-limit scheduling plan must record completed status and work")
+    if not scheduling_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", scheduling_verification
+    ):
+        failures.append("rate-limit scheduling plan must record completed verification")
+    for expected in [
+        "node test/scraper.test.js",
+        "npm test",
+        "npm run check",
+        "npm audit --omit=dev",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "external working directory",
+        "hostile mutations rejected",
+        "git diff --check",
+    ]:
+        if expected not in scheduling_verification:
+            failures.append(f"rate-limit scheduling verification must record {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

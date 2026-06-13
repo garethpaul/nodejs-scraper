@@ -95,6 +95,13 @@ no-network tests.
 - Example scripts import `../lib/scraper` so they can run from this checkout.
 - Use `reqPerSec` when issuing multiple external requests so callers do not
   overwhelm target services.
+- Positive `reqPerSec` values space request starts at `1000 / reqPerSec`
+  milliseconds. One request starts immediately, and later starts do not wait
+  for earlier responses, so slow requests may overlap without creating a burst.
+- Fractional and numeric-string `reqPerSec` values are normalized as positive
+  numbers; for example, `0.5` starts one request every two seconds. Very long
+  spacings are chained across safe timer windows instead of overflowing into an
+  immediate start.
 - Non-positive `reqPerSec` values are treated as unthrottled so the request
   queue still drains.
 
