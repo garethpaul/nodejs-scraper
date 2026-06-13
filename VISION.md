@@ -30,6 +30,8 @@ Priority:
 - Keep the header injection guard around caller-provided header names and values
 - Keep examples bounded and runnable from the repository checkout
 - Keep non-positive `reqPerSec` values from stalling queued requests
+- Keep positive `reqPerSec` values spacing request starts independently of
+  remote response completion
 - Keep non-function callbacks from throwing during asynchronous completion
 - Keep request URI dispatch limited to HTTP(S) schemes
 - Keep HTTP(S) hosts required before request dispatch
@@ -46,8 +48,7 @@ Priority:
 Next priorities:
 
 - Keep maintenance and verification on Node 20.19.0+ for jsdom compatibility
-- Add tests around callback ordering and parallel throttling
-- Add broader rate-limit tests for fractional and string `reqPerSec` values
+- Add tests around callback ordering
 - Add clearer examples for non-mutating option reuse
 - Add broader parser compatibility fixtures as real usage requires them
 - Clarify robots, terms, and rate-limit expectations for users

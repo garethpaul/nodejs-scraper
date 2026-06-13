@@ -1,6 +1,6 @@
 # Rate-Limit Scheduling
 
-status: planned
+status: completed
 
 ## Context
 
@@ -65,6 +65,42 @@ completed plan, and verification evidence.
 - run focused hostile mutations against the scheduling contracts
 - `git diff --check`
 - scan the intended diff for secrets and generated artifacts
+
+## Work Completed
+
+- Replaced completion-driven queue advancement with uniformly spaced request
+  starts for positive `reqPerSec` values.
+- Kept one immediate start and allowed later starts to proceed while earlier
+  requests remain in flight.
+- Added a private injected scheduler for deterministic no-network coverage.
+- Added integer, fractional, numeric-string, invalid-string, and no-burst tests.
+- Chained extremely long fractional-rate delays across Node-safe timer windows.
+- Documented and enforced the request-start semantics without changing the
+  public scrape signature, transport, parser, redirects, or body limits.
+
+## Verification Completed
+
+Completed locally on Node.js 20.19.5 and npm 10.8.2 on 2026-06-13:
+
+- `node test/scraper.test.js`
+- `npm test`
+- `npm run check`
+- `npm audit --omit=dev` reported zero vulnerabilities
+- `make lint`
+- `make test`
+- `make build`
+- `make check`
+- `python3 -m py_compile scripts/check-baseline.py`
+- package manifests and workflow YAML parsed successfully
+- the checker passed from an external working directory
+- ten focused hostile mutations rejected scheduler injection removal,
+  completion-driven dispatch, initial concurrency bursts, timer overflow,
+  missing tests, stale documentation, incomplete status, and unfinished evidence
+- `git diff --check`
+
+The Make gates and hostile mutation suite first passed against an isolated copy
+of the exact implementation with completed-plan evidence. The complete gates
+were then rerun against this completed plan in the repository worktree.
 
 ## Boundaries
 

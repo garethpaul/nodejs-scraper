@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-13
+
+- Changed positive `reqPerSec` throttling to space request starts uniformly
+  without waiting for remote response completion, with deterministic coverage
+  for integer, fractional, numeric-string, and invalid values.
+
 ## 2026-06-12
 
 - Replaced legacy jsdom and vendored jQuery 1.6.1 with exact jsdom 29.1.1 and
