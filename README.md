@@ -98,6 +98,9 @@ no-network tests.
 - Positive `reqPerSec` values space request starts at `1000 / reqPerSec`
   milliseconds. One request starts immediately, and later starts do not wait
   for earlier responses, so slow requests may overlap without creating a burst.
+- Each callback is delivered as its request and document parse complete, so
+  array callbacks may arrive out of input order and are not blocked by an
+  earlier slow request.
 - Fractional and numeric-string `reqPerSec` values are normalized as positive
   numbers; for example, `0.5` starts one request every two seconds. Very long
   spacings are chained across safe timer windows instead of overflowing into an

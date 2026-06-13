@@ -5,6 +5,8 @@
 - Changed positive `reqPerSec` throttling to space request starts uniformly
   without waiting for remote response completion, with deterministic coverage
   for integer, fractional, numeric-string, and invalid values.
+- Defined array callback delivery as request/parser completion order and added
+  no-network coverage for an out-of-order response pair.
 
 ## 2026-06-12
 
