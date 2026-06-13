@@ -45,6 +45,8 @@ Non-positive `reqPerSec` values should not stall queued requests.
 Positive `reqPerSec` values should bound request starts rather than scheduling
 new work from remote response completion; slow responses may overlap, but they
 must not create an initial or completion-driven burst.
+Callbacks should be delivered in completion order without buffering a finished
+result behind an earlier slow or stalled request.
 Non-function callbacks should be treated as no-ops so invalid caller input does
 not become an asynchronous process-level exception.
 Non-object headers should be ignored during normalization so invalid caller

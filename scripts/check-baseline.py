@@ -35,6 +35,7 @@ REQUIRED = [
     "docs/plans/2026-06-12-maintained-parser-lockfile.md",
     "docs/plans/2026-06-12-secure-built-in-transport.md",
     "docs/plans/2026-06-13-rate-limit-scheduling.md",
+    "docs/plans/2026-06-13-callback-completion-order.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -215,6 +216,7 @@ def main():
         "does not skip queued requests",
         "does not stall queued requests for non-positive reqPerSec",
         "spaces integer reqPerSec request starts without waiting for completion",
+        "delivers callbacks in completion order without waiting for earlier requests",
         "supports fractional and numeric-string reqPerSec spacing",
         "chunks reqPerSec spacing beyond the maximum timer delay",
         "treats invalid reqPerSec strings as unthrottled",
@@ -231,6 +233,14 @@ def main():
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
+    for phrase in [
+        "responseCallbacks['https://b.example']",
+        "assert.deepEqual(callbackBodies, ['second']);",
+        "responseCallbacks['https://a.example']",
+        "assert.deepEqual(callbackBodies, ['second', 'first']);",
+    ]:
+        if phrase not in tests:
+            failures.append(f"callback completion-order test must include {phrase}")
 
     transport_tests = read("test/http-request.test.js")
     for phrase in [
@@ -279,6 +289,15 @@ def main():
     docs = " ".join("\n".join(
         read(path) for path in ["README.md", "SECURITY.md", "VISION.md"]
     ).split())
+    readme = read("README.md")
+    security = read("SECURITY.md")
+    vision = read("VISION.md")
+    if "Each callback is delivered as its request and document parse complete" not in readme:
+        failures.append("README must document immediate callback completion order")
+    if "Callbacks should be delivered in completion order" not in security:
+        failures.append("SECURITY must document non-buffered callback completion order")
+    if "Keep array callbacks in request/parser completion order" not in vision:
+        failures.append("VISION must preserve callback completion-order behavior")
     for phrase in [
         "npm run check",
         "external requests",
@@ -295,6 +314,8 @@ def main():
         "later starts do not wait for earlier responses",
         "must not create an initial or completion-driven burst",
         "spacing request starts independently of remote response completion",
+        "callbacks in request/parser completion order",
+        "Callbacks should be delivered in completion order",
         "non-function callbacks",
         "non-object headers",
         "header injection guard",
@@ -475,6 +496,28 @@ def main():
     ]:
         if expected not in scheduling_verification:
             failures.append(f"rate-limit scheduling verification must record {expected}")
+
+    callback_order_plan = read("docs/plans/2026-06-13-callback-completion-order.md")
+    callback_order_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", callback_order_plan)
+    callback_order_work = markdown_section(callback_order_plan, "Work Completed")
+    callback_order_verification = markdown_section(callback_order_plan, "Verification Completed")
+    if (callback_order_status != ["completed"] or not callback_order_work or
+            not callback_order_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run)\b", callback_order_verification)):
+        failures.append("callback completion-order plan must record completed status and verification")
+    for expected in [
+        "node test/scraper.test.js",
+        "npm test",
+        "npm run check",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "git diff --check",
+        "hostile mutations",
+    ]:
+        if expected not in callback_order_verification:
+            failures.append(f"callback completion-order verification must record {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")
