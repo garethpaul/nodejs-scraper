@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-14
+
+- Applied each normalized transport timeout as one total request deadline
+  across redirects in addition to the existing socket inactivity timeout.
+- Added deterministic no-wait coverage for deadline cleanup, active-request
+  destruction, and callback-at-most-once behavior.
+
 ## 2026-06-13
 
 - Changed positive `reqPerSec` throttling to space request starts uniformly

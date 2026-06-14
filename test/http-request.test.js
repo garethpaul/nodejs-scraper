@@ -61,6 +61,9 @@ function fakeClient(responses, requests, options) {
 			};
 			request.end = function() {
 				requests.push(options);
+				if (clientOptions.stallAfterRequest === requests.length) {
+					return;
+				}
 				if (clientOptions.triggerTimeout) {
 					process.nextTick(request.timeoutCallback);
 					return;
@@ -249,6 +252,97 @@ test('uses the bounded default timeout and reports timeout errors', function(don
 		assert.equal(requests.length, 1);
 		done();
 	}, { maxBodyBytes: 1024 });
+});
+
+test('enforces one total request deadline without waiting for socket inactivity', function(done) {
+	var requests = [];
+	var timers = [];
+	var clearedTimers = [];
+	var destroyed = false;
+	var callbackCount = 0;
+	var client = {
+		request: function(options) {
+			var outgoing = new EventEmitter();
+			outgoing.setTimeout = function() {};
+			outgoing.destroy = function() {
+				destroyed = true;
+				process.nextTick(function() {
+					outgoing.emit('error', new Error('destroyed'));
+				});
+			};
+			outgoing.end = function() {
+				requests.push(options);
+			};
+			return outgoing;
+		}
+	};
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['93.184.216.34']),
+		setTimeout: function(callback, delay) {
+			var timer = { callback: callback, delay: delay };
+			timers.push(timer);
+			return timer;
+		},
+		clearTimeout: function(timer) {
+			clearedTimers.push(timer);
+		}
+	});
+
+	request({ uri: 'https://public.example', timeout: 250 }, function(err) {
+		callbackCount += 1;
+		assert(err);
+		assert.equal(err.message, 'Request timed out after 250 ms.');
+		assert.equal(destroyed, true);
+		assert.equal(clearedTimers.length, 1);
+		process.nextTick(function() {
+			assert.equal(callbackCount, 1);
+			done();
+		});
+	}, { maxBodyBytes: 1024 });
+
+	assert.equal(requests.length, 1);
+	assert.equal(timers.length, 1);
+	assert.equal(timers[0].delay, 250);
+	timers[0].callback();
+});
+
+test('keeps one total request deadline across redirects', function(done) {
+	var requests = [];
+	var timers = [];
+	var clearedTimers = [];
+	var client = fakeClient([
+		{ statusCode: 302, headers: { location: 'https://other.example/page' } }
+	], requests, { stallAfterRequest: 2 });
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['93.184.216.34']),
+		setTimeout: function(callback, delay) {
+			var timer = { callback: callback, delay: delay };
+			timers.push(timer);
+			return timer;
+		},
+		clearTimeout: function(timer) {
+			clearedTimers.push(timer);
+		}
+	});
+
+	request({ uri: 'https://public.example', timeout: 500 }, function(err) {
+		assert(err);
+		assert.equal(err.message, 'Request timed out after 500 ms.');
+		assert.equal(requests.length, 2);
+		assert.equal(timers.length, 1);
+		assert.equal(clearedTimers.length, 1);
+		done();
+	}, { maxBodyBytes: 1024 });
+
+	setImmediate(function() {
+		assert.equal(requests.length, 2);
+		assert.equal(timers.length, 1);
+		timers[0].callback();
+	});
 });
 
 test('strips credentials when redirects cross origins', function(done) {

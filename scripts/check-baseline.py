@@ -36,6 +36,7 @@ REQUIRED = [
     "docs/plans/2026-06-12-secure-built-in-transport.md",
     "docs/plans/2026-06-13-rate-limit-scheduling.md",
     "docs/plans/2026-06-13-callback-completion-order.md",
+    "docs/plans/2026-06-14-total-request-deadline.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -177,6 +178,12 @@ def main():
         "authorization', 'cookie', 'proxy-authorization",
         "['::ffff:0:0', 96]",
         "['64:ff9b::', 96]",
+        "var setDeadline = deps.setTimeout || setTimeout",
+        "var clearDeadline = deps.clearTimeout || clearTimeout",
+        "var deadlineTimer = setDeadline(function()",
+        "clearDeadline(deadlineTimer)",
+        "beforeCallback(outgoing)",
+        "outgoing.destroy()",
     ]:
         if phrase not in transport:
             failures.append(f"built-in transport must include {phrase}")
@@ -252,6 +259,8 @@ def main():
         "stops streaming when maxBodyBytes is exceeded",
         "rejects redirect loops after the configured limit",
         "uses the bounded default timeout and reports timeout errors",
+        "enforces one total request deadline without waiting for socket inactivity",
+        "keeps one total request deadline across redirects",
         "strips credentials when redirects cross origins",
     ]:
         if phrase not in transport_tests:
@@ -326,6 +335,7 @@ def main():
         "built-in transport",
         "private network",
         "bounded redirects",
+        "total request deadline",
         "make lint",
         "make test",
         "make build",
@@ -518,6 +528,27 @@ def main():
     ]:
         if expected not in callback_order_verification:
             failures.append(f"callback completion-order verification must record {expected}")
+
+    deadline_plan = read("docs/plans/2026-06-14-total-request-deadline.md")
+    deadline_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", deadline_plan)
+    deadline_verification = markdown_section(deadline_plan, "Verification Completed")
+    if (deadline_status != ["completed"] or not deadline_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b", deadline_verification)):
+        failures.append("total request deadline plan must record completed status and verification")
+    for expected in [
+        "node test/http-request.test.js",
+        "npm test",
+        "npm run check",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "external working directory",
+        "hostile mutations",
+        "git diff --check",
+    ]:
+        if expected not in deadline_verification:
+            failures.append(f"total request deadline verification must record {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")
