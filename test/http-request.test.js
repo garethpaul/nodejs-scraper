@@ -254,6 +254,45 @@ test('uses the bounded default timeout and reports timeout errors', function(don
 	}, { maxBodyBytes: 1024 });
 });
 
+test('reports synchronous transport setup failures and clears the deadline', function(done) {
+	var setupError = new Error('transport setup failed');
+	var timers = [];
+	var clearedTimers = [];
+	var callbackCount = 0;
+	var client = {
+		request: function() {
+			throw setupError;
+		}
+	};
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['93.184.216.34']),
+		setTimeout: function(callback, delay) {
+			var timer = { callback: callback, delay: delay };
+			timers.push(timer);
+			return timer;
+		},
+		clearTimeout: function(timer) {
+			clearedTimers.push(timer);
+		}
+	});
+
+	request({ uri: 'https://public.example', timeout: 250 }, function(err, response, body) {
+		callbackCount += 1;
+		assert.strictEqual(err, setupError);
+		assert.strictEqual(response, null);
+		assert.strictEqual(body, null);
+		assert.equal(timers.length, 1);
+		assert.equal(clearedTimers.length, 1);
+		assert.strictEqual(clearedTimers[0], timers[0]);
+		process.nextTick(function() {
+			assert.equal(callbackCount, 1);
+			done();
+		});
+	}, { maxBodyBytes: 1024 });
+});
+
 test('enforces one total request deadline without waiting for socket inactivity', function(done) {
 	var requests = [];
 	var timers = [];

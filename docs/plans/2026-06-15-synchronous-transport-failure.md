@@ -1,6 +1,6 @@
 # Normalize Synchronous Transport Setup Failures
 
-Status: In Progress
+status: completed
 
 ## Summary
 
@@ -37,7 +37,7 @@ stale timer.
 
 - Run the focused HTTP transport suite, full package tests, all Make gates,
   production dependency audit, and external-directory `make check`.
-- Reject isolated mutations removing the catch, callback error, timer cleanup
+- Reject six isolated mutations removing the catch, callback error, timer cleanup
   evidence, null response/body assertions, documentation, or completed plan.
 - Audit exact diff, whitespace, generated artifacts, conflict markers,
   intended paths, binary/large files, and changed-line credential patterns.
@@ -51,4 +51,12 @@ stale timer.
 
 ## Verification Completed
 
-Pending implementation and validation.
+- `node test/http-request.test.js`, `npm test`, every Make gate, and
+  `npm audit --omit=dev` passed.
+- `make check` passed from an external working directory through the absolute
+  Makefile path.
+- Six isolated hostile mutations covering the setup catch, callback error,
+  deadline cleanup evidence, null response/body contract, documentation, and
+  completed-plan status were rejected.
+- `git diff --check`, exact-diff, generated-artifact, conflict-marker,
+  intended-path, binary, large-file, and changed-line credential audits passed.
