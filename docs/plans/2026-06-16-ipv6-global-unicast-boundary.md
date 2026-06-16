@@ -1,6 +1,6 @@
 # IPv6 Global-Unicast Request Boundary
 
-status: planned
+status: completed
 
 ## Context
 
@@ -78,3 +78,30 @@ Files: `README.md`, `SECURITY.md`, `VISION.md`, `CHANGES.md`, `AGENTS.md`
   is exercised by the offline tests.
 - The change must remain stacked on PR #5 and must not be merged or closed
   without explicit authorization.
+
+## Work Completed
+
+- Added an explicit `2000::/3` IPv6 global-unicast allocation gate before the
+  existing special-purpose subnet exclusions.
+- Added deterministic no-network coverage for reserved IPv6 literals, DNS
+  answers, and redirect targets while retaining positive global-unicast and
+  existing special-purpose classification coverage.
+- Extended the static baseline and maintainer documentation so future IANA
+  allocation changes require an intentional code, test, and guidance update.
+
+## Verification Completed
+
+- `node test/http-request.test.js`
+- IPv4 and IPv6 classifier smoke checks for ordinary public, in-range special,
+  and outside-allocation addresses
+- `python3 -m py_compile scripts/check-baseline.py`
+- `npm test`
+- `npm run check`
+- `npm audit --omit=dev` reported zero vulnerabilities
+- `make lint`, `make test`, `make build`, and `make check`
+- `make -f /absolute/path/to/Makefile check` from an external working directory
+- Seven isolated hostile mutations rejected removal of the allocation gate,
+  literal test, DNS test, redirect test, positive global-unicast case, static
+  checker contract, and completed-plan evidence
+- `git diff --check` plus generated-artifact, large/binary-file, conflict-marker,
+  file-mode, and credential-shaped-addition audits

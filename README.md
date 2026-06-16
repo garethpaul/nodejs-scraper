@@ -91,8 +91,10 @@ no-network tests.
 - Successful documents are parsed by jsdom 29.1.1 and exposed through a jQuery
   4.0.0 `$` function. Remote page scripts and subresources are not enabled.
 - The built-in transport follows at most five redirects by default, validates
-  every redirect target, rejects private network and reserved IP destinations,
-  and strips credential-bearing headers when a redirect crosses origins.
+  every redirect target, restricts IPv6 destinations to the currently allocated
+  `2000::/3` global-unicast space, rejects private network and special-purpose
+  IP destinations, and strips credential-bearing headers when a redirect
+  crosses origins.
 - Missing or non-function callbacks are treated as no-ops.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
