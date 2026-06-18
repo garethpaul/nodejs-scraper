@@ -39,6 +39,7 @@ REQUIRED = [
     "docs/plans/2026-06-14-total-request-deadline.md",
     "docs/plans/2026-06-15-synchronous-transport-failure.md",
     "docs/plans/2026-06-16-ipv6-global-unicast-boundary.md",
+    "docs/plans/2026-06-18-undici-advisory-refresh.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -95,6 +96,17 @@ def main():
         failures.append("package-lock.json must lock the exact package and engine contract")
     if "node_modules/request" in lock.get("packages", {}):
         failures.append("package-lock.json must not contain the retired request package")
+    undici = lock.get("packages", {}).get("node_modules/undici", {})
+    undici_version = undici.get("version", "") if isinstance(undici, dict) else ""
+    undici_match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", undici_version)
+    if not undici_match or tuple(map(int, undici_match.groups())) < (7, 28, 0):
+        failures.append("package-lock.json must resolve undici 7.28.0 or newer")
+    checker_source = read("scripts/check-baseline.py")
+    if not re.search(
+        r"(?m)^    if not undici_match or tuple\(map\(int, undici_match\.groups\(\)\)\) < \(7, 28, 0\):$",
+        checker_source,
+    ):
+        failures.append("baseline must preserve the undici 7.28.0 advisory boundary")
     if (ROOT / "deps/jquery-1.6.1.min.js").exists():
         failures.append("vendored jQuery 1.6.1 must stay removed")
 
@@ -337,6 +349,13 @@ def main():
     readme = read("README.md")
     security = read("SECURITY.md")
     vision = read("VISION.md")
+    for name, content in [
+        ("README", readme),
+        ("SECURITY", security),
+        ("VISION", vision),
+    ]:
+        if "undici 7.28.0 or newer" not in " ".join(content.split()).lower():
+            failures.append(f"{name} must preserve the undici 7.28.0 advisory boundary")
     if "Each callback is delivered as its request and document parse complete" not in readme:
         failures.append("README must document immediate callback completion order")
     if "Callbacks should be delivered in completion order" not in security:
@@ -628,6 +647,31 @@ def main():
     ]:
         if expected not in ipv6_verification:
             failures.append(f"IPv6 global-unicast verification must record {expected}")
+
+    undici_plan = read("docs/plans/2026-06-18-undici-advisory-refresh.md")
+    undici_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", undici_plan)
+    undici_work = markdown_section(undici_plan, "Work Completed")
+    undici_verification = markdown_section(undici_plan, "Verification Completed")
+    if (undici_status != ["completed"] or not undici_work or
+            not undici_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b", undici_verification)):
+        failures.append("undici advisory plan must record completed status and verification")
+    for expected in [
+        "undici 7.28.0",
+        "npm ci --ignore-scripts",
+        "npm audit --omit=dev",
+        "npm test",
+        "npm run check",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "external working directory",
+        "hostile mutations",
+        "git diff --check",
+    ]:
+        if expected not in undici_verification:
+            failures.append(f"undici advisory verification must record {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

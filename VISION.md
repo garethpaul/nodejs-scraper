@@ -22,6 +22,8 @@ Priority:
 - Keep external examples on reserved `example.test` placeholders
 - Avoid encouraging aggressive scraping or bypassing site rules
 - Maintain the exact jsdom 29.1.1, jQuery 4.0.0, and lockfile contract
+- Keep the transitive lockfile resolution on undici 7.28.0 or newer and retain
+  a zero-finding production dependency audit
 - Keep the Node 20 built-in transport limited to public network destinations,
   including the currently allocated IPv6 `2000::/3` global-unicast space,
   across bounded redirects

@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-18
+
+- Refreshed the transitive undici lockfile resolution to 7.28.0 and added a
+  maintained baseline boundary for the newly disclosed high-severity advisory
+  ranges.
+
 ## 2026-06-16
 
 - Restricted built-in transport IPv6 targets to the currently allocated

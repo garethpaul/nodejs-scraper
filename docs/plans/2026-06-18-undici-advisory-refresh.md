@@ -1,7 +1,7 @@
 ---
 title: "security: Refresh the transitive Undici advisory boundary"
 type: security
-status: planned
+status: completed
 date: 2026-06-18
 execution: code
 ---
@@ -96,8 +96,32 @@ the application does not declare `undici` directly.
 - Static and unit verification cannot reproduce SOCKS proxy TLS behavior or a
   shared-cache cross-user disclosure without introducing out-of-scope systems.
 
-## Completion Evidence
+## Work Completed
 
-To be filled with the exact resolved version, validation commands, mutation
-results, hosted run identifiers, and remaining runtime boundaries after the
-implementation is finalized.
+- Refreshed only the transitive `node_modules/undici` lock entry from 7.27.2
+  to 7.28.0 through jsdom's existing compatible range; `package.json` and the
+  direct dependency set remain unchanged.
+- Extended the structural baseline to reject missing, malformed, or pre-7.28.0
+  undici lock resolutions and to preserve the exact advisory predicate.
+- Synchronized the project guidance and change record with the new transitive
+  dependency boundary.
+
+## Verification Completed
+
+- `npm ci --ignore-scripts --no-audit --no-fund` reproduced the finalized
+  lockfile and `npm audit --omit=dev` reported zero vulnerabilities with
+  undici 7.28.0 installed.
+- `npm test` and `npm run check` passed the existing parser, callback,
+  scheduler, deadline, redirect, authority, DNS, socket, and IPv6 contracts.
+- `make lint`, `make test`, `make build`, and `make check` passed from the
+  repository root and through the absolute Makefile from an external working directory.
+- Python checker compilation and `git diff --check` passed.
+- Six isolated hostile mutations to the lock version, version shape, lock-entry
+  shape, checker boundary, documentation contract, and completed-plan status
+  were rejected.
+- The diff audit found no credentials, private target data, generated
+  dependency directories, conflict markers, unintended modes, or unrelated
+  dependency churn.
+- Live SOCKS proxy TLS behavior and shared-cache cross-user isolation were not
+  executed; the fix is bounded to the patched lock resolution, audit result,
+  maintained static contract, and existing no-network tests.

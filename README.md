@@ -58,7 +58,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 The parser is locked to jsdom 29.1.1 and jQuery 4.0.0. Use `npm ci` so local and
 hosted verification exercise the exact `package-lock.json` graph. Repository
 maintenance requires Node 20.19.0 or newer; `.nvmrc` selects Node 20 for local
-use. The default network path uses Node's built-in HTTP(S) transport, while the
+use. The lockfile must resolve transitive undici 7.28.0 or newer so current TLS
+proxy and shared-cache advisories remain outside the installed graph. The
+default network path uses Node's built-in HTTP(S) transport, while the
 dependency-injected request callback remains available for compatibility and
 no-network tests.
 
