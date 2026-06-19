@@ -67,11 +67,13 @@ deadline across redirects.
 Keep the response body parse limit enabled so oversized or unsupported content
 cannot enter jsdom. The built-in transport enforces the same limit while
 streaming so the response is not fully buffered first.
-The built-in transport must reject private network, loopback, link-local,
-reserved, multicast, documentation, IPv4-mapped, and translation-prefix
-destinations after DNS resolution and on every bounded redirect. Cross-origin
-redirects must not forward authorization, cookie, or proxy authorization
-headers.
+The built-in transport must restrict IPv6 destinations to the currently
+allocated `2000::/3` global-unicast space and reject private network, loopback,
+link-local, reserved, multicast, documentation, IPv4-mapped, and
+translation-prefix destinations after DNS resolution and on every bounded
+redirect. Future IANA allocation changes require an intentional classifier and
+regression-test update. Cross-origin redirects must not forward authorization,
+cookie, or proxy authorization headers.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

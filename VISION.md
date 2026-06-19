@@ -22,7 +22,8 @@ Priority:
 - Keep external examples on reserved `example.test` placeholders
 - Avoid encouraging aggressive scraping or bypassing site rules
 - Maintain the exact jsdom 29.1.1, jQuery 4.0.0, and lockfile contract
-- Keep the Node 20 built-in transport limited to public network destinations
+- Keep the Node 20 built-in transport limited to public network destinations,
+  including the currently allocated IPv6 `2000::/3` global-unicast space,
   across bounded redirects
 - Keep no-network tests for request options and network errors
 - Keep request and fetch option normalization free of caller-visible mutation

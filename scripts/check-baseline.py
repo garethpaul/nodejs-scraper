@@ -38,6 +38,7 @@ REQUIRED = [
     "docs/plans/2026-06-13-callback-completion-order.md",
     "docs/plans/2026-06-14-total-request-deadline.md",
     "docs/plans/2026-06-15-synchronous-transport-failure.md",
+    "docs/plans/2026-06-16-ipv6-global-unicast-boundary.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -179,6 +180,9 @@ def main():
         "authorization', 'cookie', 'proxy-authorization",
         "['::ffff:0:0', 96]",
         "['64:ff9b::', 96]",
+        "var ipv6GlobalUnicast = buildIpv6GlobalUnicast()",
+        "family === 6 && !ipv6GlobalUnicast.check(address, 'ipv6')",
+        "blockList.addSubnet('2000::', 3, 'ipv6')",
         "var setDeadline = deps.setTimeout || setTimeout",
         "var clearDeadline = deps.clearTimeout || clearTimeout",
         "var deadlineTimer = setDeadline(function()",
@@ -257,6 +261,10 @@ def main():
     for phrase in [
         "classifies public and blocked IP addresses",
         "rejects bracketed private IPv6 literals before dispatch",
+        "rejects reserved IPv6 literals outside global unicast before dispatch",
+        "rejects DNS answers outside IPv6 global unicast",
+        "rejects redirects to IPv6 addresses outside global unicast",
+        "assert.equal(transport.isPublicAddress('2606:2800:220:1:248:1893:25c8:1946'), true)",
         "rejects hostnames resolving to private addresses",
         "rejects mixed public and private DNS results",
         "rejects redirects to private addresses",
@@ -271,6 +279,15 @@ def main():
     ]:
         if phrase not in transport_tests:
             failures.append(f"transport tests must include {phrase}")
+
+    for path, phrase in [
+        ("README.md", "`2000::/3` global-unicast space"),
+        ("SECURITY.md", "Future IANA allocation changes require an intentional classifier"),
+        ("VISION.md", "currently allocated IPv6 `2000::/3` global-unicast space"),
+        ("AGENTS.md", "current IPv6 `2000::/3` global-unicast allocation boundary"),
+    ]:
+        if phrase not in read(path):
+            failures.append(f"{path} must preserve IPv6 global-unicast guidance: {phrase}")
     setup_failure_parts = transport_tests.split(
         "test('reports synchronous transport setup failures and clears the deadline'", 1
     )
@@ -588,6 +605,30 @@ def main():
     ]:
         if expected not in setup_failure_verification:
             failures.append(f"synchronous transport failure verification must record {expected}")
+
+    ipv6_plan = read("docs/plans/2026-06-16-ipv6-global-unicast-boundary.md")
+    ipv6_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", ipv6_plan)
+    ipv6_work = markdown_section(ipv6_plan, "Work Completed")
+    ipv6_verification = markdown_section(ipv6_plan, "Verification Completed")
+    if (ipv6_status != ["completed"] or not ipv6_work or
+            not ipv6_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b", ipv6_verification)):
+        failures.append("IPv6 global-unicast plan must record completed status and verification")
+    for expected in [
+        "node test/http-request.test.js",
+        "npm test",
+        "npm run check",
+        "npm audit --omit=dev",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "external working directory",
+        "Seven isolated hostile mutations",
+        "git diff --check",
+    ]:
+        if expected not in ipv6_verification:
+            failures.append(f"IPv6 global-unicast verification must record {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

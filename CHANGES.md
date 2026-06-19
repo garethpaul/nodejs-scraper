@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-16
+
+- Restricted built-in transport IPv6 targets to the currently allocated
+  `2000::/3` global-unicast space across literals, DNS answers, and redirects.
+
 ## 2026-06-15
 
 - Routed synchronous transport setup failures through the single callback
