@@ -82,8 +82,10 @@ not send traffic to retired third-party endpoints.
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
 The manifest and lockfile pin jsdom 29.1.1 and jQuery 4.0.0; the default fetch
-path uses the Node 20 built-in HTTP(S) transport. Parser or transport changes
-are security-sensitive and must be verified with `npm ci`, `npm audit
+path uses the Node 20 built-in HTTP(S) transport. The transitive lockfile graph
+must resolve undici 7.28.0 or newer to exclude the current SOCKS TLS-option and
+shared-cache advisory ranges. Parser or transport changes are
+security-sensitive and must be verified with `npm ci`, `npm audit
 --omit=dev`, `npm run check`, and every Make gate. Keep jsdom script execution
 and external resource loading disabled for untrusted remote HTML.
 Synchronous transport setup failures must clear the total-request deadline and
