@@ -34,19 +34,11 @@ function run(index) {
 	}
 }
 
-function scraperWithRequest(fakeRequest, fakeJsdom) {
-	return scraperModule.createScraper({
+function scraperWithRequest(fakeRequest, fakeCreateDocument, extraDeps) {
+	var deps = {
 		request: fakeRequest,
-		jsdom: fakeJsdom || {
-			jsdom: function() {
-				return {
-					createWindow: function() {
-						return {};
-					}
-				};
-			},
-			jQueryify: function(window, path, callback) {
-				callback(window, function() {
+		createDocument: fakeCreateDocument || function(body, callback) {
+			callback(null, function() {
 					return {
 						append: function() { return this; },
 						find: function() {
@@ -58,10 +50,13 @@ function scraperWithRequest(fakeRequest, fakeJsdom) {
 						text: function() { return 'Example Domain'; },
 						length: 1
 					};
-				});
-			}
+			});
 		}
+	};
+	Object.keys(extraDeps || {}).forEach(function(key) {
+		deps[key] = extraDeps[key];
 	});
+	return scraperModule.createScraper(deps);
 }
 
 test('normalizes string request options', function(done) {
@@ -183,11 +178,9 @@ test('rejects oversized response bodies before parsing', function(done) {
 		process.nextTick(function() {
 			callback(null, { statusCode: 200 }, Buffer.alloc(1024 * 1024 + 1, 'a'));
 		});
-	}, {
-		jsdom: function() {
-			parsed = true;
-			throw new Error('oversized body reached jsdom');
-		}
+	}, function() {
+		parsed = true;
+		throw new Error('oversized body reached parser');
 	});
 
 	scraper('https://example.com', function(err, $) {
@@ -205,11 +198,9 @@ test('measures response body limits in utf8 bytes', function(done) {
 		process.nextTick(function() {
 			callback(null, { statusCode: 200 }, 'éé');
 		});
-	}, {
-		jsdom: function() {
-			parsed = true;
-			throw new Error('oversized body reached jsdom');
-		}
+	}, function() {
+		parsed = true;
+		throw new Error('oversized body reached parser');
 	});
 
 	scraper('https://example.com', function(err) {
@@ -254,17 +245,56 @@ test('rejects unsupported response body types before parsing', function(done) {
 		process.nextTick(function() {
 			callback(null, { statusCode: 200 }, { html: '<body>no</body>' });
 		});
-	}, {
-		jsdom: function() {
-			parsed = true;
-			throw new Error('unsupported body reached jsdom');
-		}
+	}, function() {
+		parsed = true;
+		throw new Error('unsupported body reached parser');
 	});
 
 	scraper('https://example.com', function(err) {
 		assert(err);
 		assert.equal(err.message, 'Response body must be text or a buffer.');
 		assert.equal(parsed, false);
+		done();
+	});
+});
+
+test('reports document parser errors', function(done) {
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, { statusCode: 200 }, '<html><body>broken</body></html>');
+		});
+	}, function(body, callback) {
+		callback(new Error('parser failed'), null);
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert(err);
+		assert.equal(err.message, 'parser failed');
+		assert.equal($, null);
+		done();
+	});
+});
+
+test('parses successful responses with the maintained document adapter', function(done) {
+	var scraper = scraperModule.createScraper({
+		request: function(options, callback) {
+			process.nextTick(function() {
+				callback(null, { statusCode: 200 }, [
+					'<!doctype html><html><head><title>Maintained</title></head>',
+					'<body><main id="content">Ready</main>',
+					'<script>window.__scraperExecuted = true</script></body></html>'
+				].join(''));
+			});
+		}
+	});
+
+	scraper('https://example.com', function(err, $) {
+		assert.ifError(err);
+		assert.equal($('title').text(), 'Maintained');
+		assert.equal($('#content').text(), 'Ready');
+		assert.equal($('script').length, 0);
+		assert.equal($('nobreakage').length, 1);
+		assert.equal($('body')[0].ownerDocument.defaultView.__scraperExecuted, undefined);
 		done();
 	});
 });
@@ -431,6 +461,150 @@ test('does not stall queued requests for non-positive reqPerSec', function(done)
 			done();
 		}
 	}, { reqPerSec: -1 });
+});
+
+test('spaces integer reqPerSec request starts without waiting for completion', function(done) {
+	var calledUris = [];
+	var responseCallbacks = [];
+	var scheduled = [];
+	var callbackCount = 0;
+	var scraper = scraperWithRequest(function(options, callback) {
+		calledUris.push(options.uri);
+		responseCallbacks.push(callback);
+	}, null, {
+		schedule: function(callback, delay) {
+			scheduled.push({ callback: callback, delay: delay });
+		}
+	});
+
+	scraper(['https://a.example', 'https://b.example', 'https://c.example'], function(err) {
+		assert.ifError(err);
+		callbackCount += 1;
+		if (callbackCount === 3) {
+			done();
+		}
+	}, { reqPerSec: 2 });
+
+	assert.deepEqual(calledUris, ['https://a.example']);
+	assert.equal(scheduled.length, 1);
+	assert.equal(scheduled[0].delay, 500);
+	scheduled.shift().callback();
+	assert.deepEqual(calledUris, ['https://a.example', 'https://b.example']);
+	assert.equal(responseCallbacks.length, 2);
+	assert.equal(scheduled.length, 1);
+	assert.equal(scheduled[0].delay, 500);
+	scheduled.shift().callback();
+	assert.deepEqual(calledUris, ['https://a.example', 'https://b.example', 'https://c.example']);
+	assert.equal(responseCallbacks.length, 3);
+	assert.equal(scheduled.length, 0);
+	responseCallbacks.forEach(function(callback) {
+		callback(null, { statusCode: 200 }, '<html><head></head><body></body></html>');
+	});
+});
+
+test('delivers callbacks in completion order without waiting for earlier requests', function(done) {
+	var responseCallbacks = {};
+	var scheduled = [];
+	var callbackBodies = [];
+	var scraper = scraperWithRequest(function(options, callback) {
+		responseCallbacks[options.uri] = callback;
+	}, function(body, callback) {
+		callback(null, function() {
+			return { text: function() { return body; } };
+		});
+	}, {
+		schedule: function(callback, delay) {
+			scheduled.push({ callback: callback, delay: delay });
+		}
+	});
+
+	scraper(['https://a.example', 'https://b.example'], function(err, $) {
+		assert.ifError(err);
+		callbackBodies.push($().text());
+		if (callbackBodies.length === 2) {
+			assert.deepEqual(callbackBodies, ['second', 'first']);
+			done();
+		}
+	}, { reqPerSec: 2 });
+
+	assert.equal(scheduled.length, 1);
+	scheduled.shift().callback();
+	responseCallbacks['https://b.example'](null, { statusCode: 200 }, 'second');
+	assert.deepEqual(callbackBodies, ['second']);
+	responseCallbacks['https://a.example'](null, { statusCode: 200 }, 'first');
+});
+
+test('supports fractional and numeric-string reqPerSec spacing', function(done) {
+	[
+		{ value: 0.5, delay: 2000 },
+		{ value: '4', delay: 250 }
+	].forEach(function(example) {
+		var calledUris = [];
+		var scheduled = [];
+		var scraper = scraperWithRequest(function(options) {
+			calledUris.push(options.uri);
+		}, null, {
+			schedule: function(callback, delay) {
+				scheduled.push({ callback: callback, delay: delay });
+			}
+		});
+
+		scraper(['https://a.example', 'https://b.example'], function() {}, {
+			reqPerSec: example.value
+		});
+		assert.deepEqual(calledUris, ['https://a.example']);
+		assert.equal(scheduled.length, 1);
+		assert.equal(scheduled[0].delay, example.delay);
+		scheduled[0].callback();
+		assert.deepEqual(calledUris, ['https://a.example', 'https://b.example']);
+	});
+	done();
+});
+
+test('chunks reqPerSec spacing beyond the maximum timer delay', function(done) {
+	var maxTimerDelay = 2147483647;
+	var calledUris = [];
+	var scheduled = [];
+	var scraper = scraperWithRequest(function(options) {
+		calledUris.push(options.uri);
+	}, null, {
+		schedule: function(callback, delay) {
+			scheduled.push({ callback: callback, delay: delay });
+		}
+	});
+
+	scraper(['https://a.example', 'https://b.example'], function() {}, {
+		reqPerSec: 1000 / (maxTimerDelay + 500)
+	});
+	assert.deepEqual(calledUris, ['https://a.example']);
+	assert.equal(scheduled.length, 1);
+	assert.equal(scheduled[0].delay, maxTimerDelay);
+	scheduled.shift().callback();
+	assert.deepEqual(calledUris, ['https://a.example']);
+	assert.equal(scheduled.length, 1);
+	assert(Math.abs(scheduled[0].delay - 500) < 0.001);
+	scheduled.shift().callback();
+	assert.deepEqual(calledUris, ['https://a.example', 'https://b.example']);
+	done();
+});
+
+test('treats invalid reqPerSec strings as unthrottled', function(done) {
+	var calledUris = [];
+	var scheduled = [];
+	var scraper = scraperWithRequest(function(options) {
+		calledUris.push(options.uri);
+	}, null, {
+		schedule: function(callback, delay) {
+			scheduled.push({ callback: callback, delay: delay });
+		}
+	});
+
+	scraper(['https://a.example', 'https://b.example'], function() {}, {
+		reqPerSec: 'not-a-rate'
+	});
+	assert.deepEqual(calledUris, ['https://a.example', 'https://b.example']);
+	assert.equal(scheduled.length, 0);
+	done();
 });
 
 test('treats non-function callbacks as no-op', function(done) {

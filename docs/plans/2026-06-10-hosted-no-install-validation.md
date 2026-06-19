@@ -2,6 +2,11 @@
 
 status: completed
 
+> Historical boundary: this no-install gate was valid while the repository had
+> an unlocked legacy parser tree. It was superseded on June 12, 2026 by the
+> exact `package-lock.json`, `npm ci --ignore-scripts`, and production-audit
+> contract in `2026-06-12-maintained-parser-lockfile.md`.
+
 ## Context
 
 The repository has dependency-injected tests that run without network access or
@@ -11,7 +16,8 @@ has no committed lockfile, so modern `npm install` is not reproducible.
 ## Priorities
 
 1. Run the canonical no-install `make check` gate on hosted Linux.
-2. Pin checkout, Python, permissions, runner, timeout, and concurrency behavior.
+2. Pin credential-free checkout, Node 20, Python, permissions, runner, timeout,
+   and concurrency behavior.
 3. Enforce the workflow contract from the baseline checker.
 4. Keep package installation, external scraping, and live requests outside CI.
 
@@ -27,9 +33,9 @@ Files:
 - `CHANGES.md`
 
 Add push, pull-request, and manual triggers; read-only permissions; concurrency
-cancellation; a bounded `ubuntu-24.04` job; commit-pinned checkout and Python
-setup; Node availability reporting; and `make check`. Require that contract
-from the baseline checker.
+cancellation; a bounded `ubuntu-24.04` job; commit-pinned credential-free
+checkout; pinned Node 20 and Python setup; and `make check`. Require that
+contract from the baseline checker.
 
 ## Verification
 

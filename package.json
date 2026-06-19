@@ -3,16 +3,16 @@
   "description" : "Easier web scraping using jQuery.",
   "version" : "0.0.9",
   "author" : "Mathias Pettersson <mape@mape.me>",
-  "engines" : { "node" : ">=6" },
+  "engines" : { "node" : ">=20.19.0" },
   "directories" : { "lib" : "./lib" },
   "main" : "./lib/scraper.js",
   "scripts" : {
-    "test" : "node test/scraper.test.js",
+    "test" : "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js",
     "check" : "npm test && python3 scripts/check-baseline.py"
   },
   "repository" : { "type":"git", "url":"https://github.com/mape/node-scraper.git" },
   "dependencies" : {
-    "request" : "2.88.2",
-    "jsdom" : "0.2.19"
+    "jquery" : "4.0.0",
+    "jsdom" : "29.1.1"
   }
 }
