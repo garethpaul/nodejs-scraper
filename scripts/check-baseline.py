@@ -37,6 +37,7 @@ REQUIRED = [
     "docs/plans/2026-06-13-rate-limit-scheduling.md",
     "docs/plans/2026-06-13-callback-completion-order.md",
     "docs/plans/2026-06-14-total-request-deadline.md",
+    "docs/plans/2026-06-15-synchronous-transport-failure.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -184,6 +185,9 @@ def main():
         "clearDeadline(deadlineTimer)",
         "beforeCallback(outgoing)",
         "outgoing.destroy()",
+        "var outgoing;",
+        "outgoing = client.request({",
+        "} catch (err) {\n\t\t\t\tfinish(err);\n\t\t\t\treturn;",
     ]:
         if phrase not in transport:
             failures.append(f"built-in transport must include {phrase}")
@@ -259,6 +263,7 @@ def main():
         "stops streaming when maxBodyBytes is exceeded",
         "rejects redirect loops after the configured limit",
         "uses the bounded default timeout and reports timeout errors",
+        "reports synchronous transport setup failures and clears the deadline",
         "enforces one total request deadline without waiting for socket inactivity",
         "keeps one total request deadline across redirects",
         "strips credentials when redirects cross origins",
@@ -266,6 +271,20 @@ def main():
     ]:
         if phrase not in transport_tests:
             failures.append(f"transport tests must include {phrase}")
+    setup_failure_parts = transport_tests.split(
+        "test('reports synchronous transport setup failures and clears the deadline'", 1
+    )
+    setup_failure_test = setup_failure_parts[1].split("\ntest(", 1)[0] if len(setup_failure_parts) == 2 else ""
+    for phrase in [
+        "assert.strictEqual(err, setupError);",
+        "assert.strictEqual(response, null);",
+        "assert.strictEqual(body, null);",
+        "assert.equal(clearedTimers.length, 1);",
+        "assert.strictEqual(clearedTimers[0], timers[0]);",
+        "assert.equal(callbackCount, 1);",
+    ]:
+        if phrase not in setup_failure_test:
+            failures.append(f"synchronous transport failure test must include {phrase}")
 
     document_tests = read("test/document.test.js")
     for phrase in [
@@ -337,6 +356,7 @@ def main():
         "private network",
         "bounded redirects",
         "total request deadline",
+        "synchronous transport setup failures",
         "make lint",
         "make test",
         "make build",
@@ -550,6 +570,24 @@ def main():
     ]:
         if expected not in deadline_verification:
             failures.append(f"total request deadline verification must record {expected}")
+
+    setup_failure_plan = read("docs/plans/2026-06-15-synchronous-transport-failure.md")
+    setup_failure_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", setup_failure_plan)
+    setup_failure_verification = markdown_section(setup_failure_plan, "Verification Completed")
+    if (setup_failure_status != ["completed"] or not setup_failure_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b", setup_failure_verification)):
+        failures.append("synchronous transport failure plan must record completed status and verification")
+    for expected in [
+        "node test/http-request.test.js",
+        "npm test",
+        "npm audit --omit=dev",
+        "make check",
+        "external working directory",
+        "Six isolated hostile mutations",
+        "git diff --check",
+    ]:
+        if expected not in setup_failure_verification:
+            failures.append(f"synchronous transport failure verification must record {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

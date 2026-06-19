@@ -82,6 +82,8 @@ no-network tests.
   option overrides that default; invalid timeout values fall back to it. The
   built-in transport applies the value as both a socket inactivity timeout and
   one total request deadline across redirects.
+- Synchronous transport setup failures are delivered through the normal
+  callback with a cleared total-request deadline instead of escaping the API.
 - Successful response bodies use a 1 MiB parse limit by default. A finite
   positive `fetchOptions.maxBodyBytes` value overrides it; oversized or
   unsupported body types fail before jsdom parsing. The built-in
@@ -151,6 +153,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Keep the default request timeout bounded when callers omit or provide an
   invalid `timeout` option, and preserve the total request deadline across
   redirects.
+- Keep synchronous transport setup failures on the single callback path so
+  setup exceptions cannot leave a stale deadline armed.
 - Scraping workflows should respect robots guidance, terms of service, and
   rate limits.
 - Treat non-positive `reqPerSec` values as a caller mistake rather than a

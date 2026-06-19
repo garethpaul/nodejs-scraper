@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-15
+
+- Routed synchronous transport setup failures through the single callback
+  boundary while clearing the total-request deadline.
+
 ## 2026-06-14
 
 - Applied each normalized transport timeout as one total request deadline

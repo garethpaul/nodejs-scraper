@@ -84,6 +84,8 @@ path uses the Node 20 built-in HTTP(S) transport. Parser or transport changes
 are security-sensitive and must be verified with `npm ci`, `npm audit
 --omit=dev`, `npm run check`, and every Make gate. Keep jsdom script execution
 and external resource loading disabled for untrusted remote HTML.
+Synchronous transport setup failures must clear the total-request deadline and
+reach the normal callback exactly once instead of escaping the API.
 Maintenance and verification require Node 20 or newer; Node 6 is unsupported
 and must not be used as a production or security-testing runtime.
 Hosted verification pins Node 20 and disables checkout credential persistence;
