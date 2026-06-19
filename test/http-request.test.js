@@ -284,4 +284,37 @@ test('strips credentials when redirects cross origins', function(done) {
 	}, { maxBodyBytes: 1024 });
 });
 
+test('does not restore stripped credentials on later redirects', function(done) {
+	var requests = [];
+	var client = fakeClient([
+		{ statusCode: 302, headers: { location: 'https://other.example/first' } },
+		{ statusCode: 302, headers: { location: 'https://other.example/second' } },
+		{ statusCode: 200, chunks: ['ok'] }
+	], requests);
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['93.184.216.34'])
+	});
+
+	request({
+		uri: 'https://public.example',
+		timeout: 1000,
+		headers: {
+			Authorization: 'Bearer secret',
+			Cookie: 'session=secret',
+			Accept: 'text/html'
+		}
+	}, function(err, response, body) {
+		assert.ifError(err);
+		assert.equal(response.statusCode, 200);
+		assert.equal(body.toString(), 'ok');
+		assert.equal(requests.length, 3);
+		assert.equal(requests[0].headers.Authorization, 'Bearer secret');
+		assert.deepEqual(requests[1].headers, { Accept: 'text/html' });
+		assert.deepEqual(requests[2].headers, { Accept: 'text/html' });
+		done();
+	}, { maxBodyBytes: 1024 });
+});
+
 run(0);

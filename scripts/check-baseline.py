@@ -159,7 +159,7 @@ def main():
         "require('https')",
         "createPublicLookup",
         "lookup: lookup",
-        "dispatch(redirectUrl.toString(), redirects + 1, parsed)",
+        "dispatch(redirectUrl.toString(), redirects + 1, parsed, headers)",
         "Request host must resolve only to a public network address.",
         "Request redirect limit of ",
         "response.destroy()",
@@ -230,6 +230,7 @@ def main():
         "rejects redirect loops after the configured limit",
         "uses the bounded default timeout and reports timeout errors",
         "strips credentials when redirects cross origins",
+        "does not restore stripped credentials on later redirects",
     ]:
         if phrase not in transport_tests:
             failures.append(f"transport tests must include {phrase}")
