@@ -39,7 +39,8 @@ Priority:
 - Keep HTTP(S) hosts required before request dispatch
 - Keep HTTP(S) URI credentials rejected before request dispatch
 - Keep outbound requests on a 10-second timeout by default while preserving
-  finite positive caller overrides
+  finite positive caller overrides and one total request deadline across
+  redirects
 - Keep a configurable streaming and parse limit in front of jsdom
 - Keep remote scripts and subresources disabled during document parsing
 - Keep `make lint`, `make test`, `make build`, and `make check` wired to the
@@ -85,8 +86,9 @@ robots, terms, and rate limits. The library should not hide target URLs,
 credentials, or request behavior from callers.
 The header injection guard should keep CR/LF-bearing header names and values out
 of request options before dispatch.
-Outbound requests should retain a bounded default timeout so unavailable
-targets cannot leave work open indefinitely.
+Outbound requests should retain a bounded default timeout and total request
+deadline so unavailable or slow-drip targets cannot leave work open
+indefinitely.
 Oversized or unsupported response bodies should fail before jsdom
 parsing. The built-in transport should stop reading once the streaming byte
 limit is exceeded.

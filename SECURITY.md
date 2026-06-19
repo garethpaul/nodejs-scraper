@@ -59,9 +59,11 @@ HTTP(S) hosts should be required before dispatch so malformed HTTP URLs do not
 reach the request client.
 HTTP(S) URI credentials should be rejected before dispatch so credential-bearing
 URLs do not reach the request client.
-Outbound requests use a 10-second timeout by default so an unresponsive target
-cannot hold a request open indefinitely. Callers may supply a finite positive
-timeout; invalid values fall back to the bounded default.
+Outbound requests use a 10-second timeout by default so an unresponsive or
+slow-drip target cannot hold a request open indefinitely. Callers may supply a
+finite positive timeout; invalid values fall back to the bounded default. The
+built-in transport enforces both socket inactivity and one total request
+deadline across redirects.
 Keep the response body parse limit enabled so oversized or unsupported content
 cannot enter jsdom. The built-in transport enforces the same limit while
 streaming so the response is not fully buffered first.
