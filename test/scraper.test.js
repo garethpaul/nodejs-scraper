@@ -502,6 +502,38 @@ test('spaces integer reqPerSec request starts without waiting for completion', f
 	});
 });
 
+test('delivers callbacks in completion order without waiting for earlier requests', function(done) {
+	var responseCallbacks = {};
+	var scheduled = [];
+	var callbackBodies = [];
+	var scraper = scraperWithRequest(function(options, callback) {
+		responseCallbacks[options.uri] = callback;
+	}, function(body, callback) {
+		callback(null, function() {
+			return { text: function() { return body; } };
+		});
+	}, {
+		schedule: function(callback, delay) {
+			scheduled.push({ callback: callback, delay: delay });
+		}
+	});
+
+	scraper(['https://a.example', 'https://b.example'], function(err, $) {
+		assert.ifError(err);
+		callbackBodies.push($().text());
+		if (callbackBodies.length === 2) {
+			assert.deepEqual(callbackBodies, ['second', 'first']);
+			done();
+		}
+	}, { reqPerSec: 2 });
+
+	assert.equal(scheduled.length, 1);
+	scheduled.shift().callback();
+	responseCallbacks['https://b.example'](null, { statusCode: 200 }, 'second');
+	assert.deepEqual(callbackBodies, ['second']);
+	responseCallbacks['https://a.example'](null, { statusCode: 200 }, 'first');
+});
+
 test('supports fractional and numeric-string reqPerSec spacing', function(done) {
 	[
 		{ value: 0.5, delay: 2000 },
