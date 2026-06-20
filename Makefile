@@ -1,7 +1,7 @@
 .PHONY: build check lint static-check test verify
 
 PYTHON ?= python3
-ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 check: verify
 

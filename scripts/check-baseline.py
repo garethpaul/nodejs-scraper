@@ -113,7 +113,7 @@ def main():
     makefile = read("Makefile")
     for phrase in [
         ".PHONY: build check lint static-check test verify",
-        "ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))",
+        "override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))",
         "check: verify",
         "verify: test static-check",
         "lint build: static-check",
