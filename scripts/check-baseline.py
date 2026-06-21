@@ -113,12 +113,23 @@ def main():
     makefile = read("Makefile")
     for phrase in [
         ".PHONY: build check lint static-check test verify",
-        "override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))",
+        "override SHELL := /bin/sh",
+        "override .SHELLFLAGS := -c",
+        "ifneq ($(strip $(MAKEFILES)),)",
+        "$(error MAKEFILES must not be set)",
+        "override MAKEFILES :=",
+        "ifneq ($(origin MAKEFILE_LIST),file)",
+        "$(error MAKEFILE_LIST must not be overridden)",
+        "trusted Makefile path not found",
+        "override PYTHON := python3",
+        "build check lint static-check test verify: override ROOT := $(ROOT)",
+        "build check lint static-check test verify: override PYTHON := $(PYTHON)",
         "check: verify",
         "verify: test static-check",
         "lint build: static-check",
         "cd \"$(ROOT)\" && npm test",
-        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) \"$(ROOT)scripts/check-baseline.py\"",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) \"$(ROOT)/scripts/check-baseline.py\"",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) \"$(ROOT)/test/makefile-root.test.py\"",
     ]:
         if phrase not in makefile:
             failures.append(f"Makefile must include standard gate alias: {phrase}")
