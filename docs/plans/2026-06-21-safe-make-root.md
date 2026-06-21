@@ -8,9 +8,13 @@ wrong checkout.
 
 ## Change
 
-- Resolve the raw Makefile path with POSIX-compatible system tooling.
+- Resolve the final existing trusted Makefile suffix without splitting spaces
+  inside its path, including after an inert earlier `-f` input.
 - Reject non-file origins for GNU Make's automatic `MAKEFILE_LIST` value.
-- Add regressions for spaces, a literal apostrophe, and injection.
+- Reject `MAKEFILES` preloads and freeze the recipe shell, Python verifier, and
+  derived root on every public target.
+- Add regressions for spaces, a literal apostrophe, preload and interpreter
+  replacement, relative trusted Makefiles, and injection.
 
 ## Validation
 

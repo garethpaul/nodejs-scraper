@@ -113,9 +113,17 @@ def main():
     makefile = read("Makefile")
     for phrase in [
         ".PHONY: build check lint static-check test verify",
+        "override SHELL := /bin/sh",
+        "override .SHELLFLAGS := -c",
+        "ifneq ($(strip $(MAKEFILES)),)",
+        "$(error MAKEFILES must not be set)",
+        "override MAKEFILES :=",
         "ifneq ($(origin MAKEFILE_LIST),file)",
         "$(error MAKEFILE_LIST must not be overridden)",
-        "override ROOT := $(shell path='$(subst ','\"'\"',$(MAKEFILE_LIST))'; path=$$(printf '%s' \"$$path\" | /usr/bin/sed 's/^ //'); /usr/bin/dirname -- \"$$path\")",
+        "trusted Makefile path not found",
+        "override PYTHON := python3",
+        "build check lint static-check test verify: override ROOT := $(ROOT)",
+        "build check lint static-check test verify: override PYTHON := $(PYTHON)",
         "check: verify",
         "verify: test static-check",
         "lint build: static-check",

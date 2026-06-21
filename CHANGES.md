@@ -4,6 +4,9 @@
 
 - Made absolute Makefile verification safe for spaces and apostrophes and
   rejected `MAKEFILE_LIST` injection before npm or policy checks run.
+- Rejected `MAKEFILES` preloads, froze the verifier interpreter and recipe
+  shell, and preserved relative trusted Makefiles after inert earlier `-f`
+  inputs.
 - Added the root-policy regressions to the normal static verification target.
 
 ## 2026-06-18
