@@ -40,6 +40,7 @@ REQUIRED = [
     "docs/plans/2026-06-15-synchronous-transport-failure.md",
     "docs/plans/2026-06-16-ipv6-global-unicast-boundary.md",
     "docs/plans/2026-06-18-undici-advisory-refresh.md",
+    "docs/plans/2026-06-21-spaced-makefile-path.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -129,10 +130,20 @@ def main():
         "lint build: static-check",
         "cd \"$(ROOT)\" && npm test",
         "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) \"$(ROOT)/scripts/check-baseline.py\"",
-        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) \"$(ROOT)/test/makefile-root.test.py\"",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) \"$(ROOT)/test/test_makefile_root.py\"",
     ]:
         if phrase not in makefile:
             failures.append(f"Makefile must include standard gate alias: {phrase}")
+
+    spaced_makefile_plan = read("docs/plans/2026-06-21-spaced-makefile-path.md")
+    if not all(value in spaced_makefile_plan for value in [
+        "status: completed",
+        "spaces, brackets,",
+        "an apostrophe",
+        "MAKEFILES",
+        "all six Make aliases",
+    ]):
+        failures.append("spaced Makefile path plan must preserve hostile-path and authority verification")
 
     source = read("lib/scraper.js")
     for phrase in [

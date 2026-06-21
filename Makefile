@@ -25,4 +25,4 @@ lint build: static-check
 
 static-check:
 	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) "$(ROOT)/scripts/check-baseline.py"
-	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) "$(ROOT)/test/makefile-root.test.py"
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) "$(ROOT)/test/test_makefile_root.py"

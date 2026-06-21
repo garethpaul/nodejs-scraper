@@ -126,7 +126,7 @@ no-network tests.
 - `make build`
 - `make check`
 - The Make gates are location-independent, including checkout paths containing
-  spaces or apostrophes. From another directory, run
+  spaces, brackets, or apostrophes. From another directory, run
   `make -f /path/to/nodejs-scraper/Makefile check`.
 - `MAKEFILE_LIST` overrides and `MAKEFILES` preloads fail before npm or policy
   checks are emitted. Public targets freeze the checkout root, recipe shell,
