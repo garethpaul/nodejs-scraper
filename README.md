@@ -125,6 +125,10 @@ no-network tests.
 - `make test`
 - `make build`
 - `make check`
+- The Make gates are location-independent, including checkout paths containing
+  spaces or apostrophes. From another directory, run
+  `make -f /path/to/nodejs-scraper/Makefile check`.
+- `MAKEFILE_LIST` overrides fail before npm or policy checks are emitted.
 - Pinned, credential-free, read-only `ubuntu-24.04` GitHub Actions sets up Node
   20, installs the exact lockfile with scripts disabled, audits production
   dependencies, and runs the no-network tests and static baseline.
