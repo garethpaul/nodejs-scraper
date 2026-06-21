@@ -7,7 +7,8 @@
 - Rejected `MAKEFILES` preloads, froze the verifier interpreter and recipe
   shell, and preserved relative trusted Makefiles after inert earlier `-f`
   inputs.
-- Added the root-policy regressions to the normal static verification target.
+- Exercised all six Make aliases from checkout paths containing spaces,
+  brackets, and apostrophes, with command-line and environment root attacks.
 
 ## 2026-06-18
 
