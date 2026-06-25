@@ -85,6 +85,16 @@ function fakeClient(responses, requests, options) {
 					});
 					response.statusCode = responseSpec.statusCode;
 					response.headers = responseSpec.headers || {};
+					var destroy = response.destroy;
+					response.destroy = function(err) {
+						responseSpec.destroyed = true;
+						return destroy.call(response, err);
+					};
+					var resume = response.resume;
+					response.resume = function() {
+						responseSpec.resumed = true;
+						return resume.call(response);
+					};
 					onResponse(response);
 				});
 			};
@@ -284,6 +294,49 @@ test('rejects redirect loops after the configured limit', function(done) {
 		assert.equal(requests.length, 2);
 		done();
 	}, { maxBodyBytes: 1024, maxRedirects: 1 });
+});
+
+test('destroys redirect responses instead of draining unbounded bodies', function(done) {
+	var requests = [];
+	var redirect = { statusCode: 302, headers: { location: '/next' } };
+	var client = fakeClient([
+		redirect,
+		{ statusCode: 200, chunks: ['ok'] }
+	], requests);
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['93.184.216.34'])
+	});
+
+	request({ uri: 'https://public.example', timeout: 1000 }, function(err, response, body) {
+		assert.ifError(err);
+		assert.equal(response.statusCode, 200);
+		assert.equal(body.toString(), 'ok');
+		assert.equal(redirect.destroyed, true);
+		assert.notEqual(redirect.resumed, true);
+		done();
+	}, { maxBodyBytes: 1024 });
+});
+
+test('destroys non-success responses instead of draining unbounded bodies', function(done) {
+	var requests = [];
+	var rejected = { statusCode: 503, chunks: [Buffer.alloc(2048)] };
+	var client = fakeClient([rejected], requests);
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['93.184.216.34'])
+	});
+
+	request({ uri: 'https://public.example', timeout: 1000 }, function(err, response, body) {
+		assert.ifError(err);
+		assert.equal(response.statusCode, 503);
+		assert.equal(body, null);
+		assert.equal(rejected.destroyed, true);
+		assert.notEqual(rejected.resumed, true);
+		done();
+	}, { maxBodyBytes: 1024 });
 });
 
 test('uses the bounded default timeout and reports timeout errors', function(done) {

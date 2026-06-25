@@ -1,5 +1,25 @@
 # Changes
 
+## 2026-06-25T20:47:20Z — P1 security/correctness — cycle: unused responses
+
+- Threads: inspected the default branch, open work, transport/parser boundary,
+  redirect handling, request deadlines, streaming limits, dependency audit,
+  hosted workflow, Make authority, and existing no-network coverage; no open
+  pull requests or issues were present.
+- Bug fixed: redirect and non-200 response bodies are now error-observed and
+  destroyed instead of being drained without a size or completion bound, so a
+  hostile unused body cannot retain a background socket after the scrape moves
+  on or returns status metadata.
+- Files: `lib/http-request.js` and `test/http-request.test.js`.
+- Validation: reproduced both paths calling `resume()` under Node 20.19.0,
+  passed the focused HTTP transport suite, passed `make check`, and confirmed
+  `npm audit --omit=dev` reports zero vulnerabilities with the exact lockfile.
+- Blockers: the host Node 18.19.1 is below the repository runtime contract, so
+  validation used the official Node 20.19.0 Docker image; no release blocker
+  remains.
+- Next: continue auditing response and redirect lifecycle transitions for
+  callback-at-most-once behavior under late stream and socket errors.
+
 ## 2026-06-21
 
 - Made absolute Makefile verification safe for spaces and apostrophes and
