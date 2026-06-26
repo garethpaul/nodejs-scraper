@@ -1,5 +1,32 @@
 # Changes
 
+## 2026-06-26T01:04:22Z — P2 correctness — cycle: missing response metadata
+
+- Threads: selected the next explicitly licensed stale repository, confirmed
+  no open work, reviewed transport, SSRF, parser, queue, dependency, and hosted
+  boundaries, and verified the exact lockfile on Node 20.19.0.
+- Bug fixed: an injected or alternate transport callback returning no error and
+  a `null` response caused the scraper to read `response.statusCode` and throw a
+  `TypeError` outside its documented callback error path.
+- Fix: status formatting now reads `statusCode` only from a present response and
+  otherwise reports `unknown` while preserving the requested URI.
+- Tests: added a no-network red/green regression that requires one callback,
+  null result values, no parser invocation, and the stable unknown-status error.
+- Contracts: static verification requires the null-safe guard, executable
+  regression, completed plan, audit evidence, and hostile mutations.
+- Validation: the pre-fix Node 20 regression crashed on the null property read;
+  the focused suite passed after the fix. Three hostile mutations were
+  rejected. Repository and external-directory `make check`, `npm test`, six
+  Make-root tests, static baseline checks, `git diff --check`, and
+  `npm audit --omit=dev` all passed; the audit reported zero vulnerabilities.
+- Blockers: host Node 18.19.1 is below the repository's Node 20.19.0 contract,
+  so behavior validation uses the official Node 20.19.0 image.
+- Hosted: implementation head `233fc0c` passed both Node 20 baseline runs and
+  CodeQL for Actions, JavaScript/TypeScript, and Python. Exact-head Codex review
+  reported no actionable regressions.
+- Next: revalidate this documentation-only head, merge PR #12, and synchronize
+  `master`.
+
 ## 2026-06-25T20:47:20Z — P1 security/correctness — cycle: unused responses
 
 - Threads: inspected the default branch, open work, transport/parser boundary,

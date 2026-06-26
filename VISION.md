@@ -28,6 +28,7 @@ Priority:
   including the currently allocated IPv6 `2000::/3` global-unicast space,
   across bounded redirects
 - Keep no-network tests for request options and network errors
+- Keep absent transport response metadata on the callback error path
 - Keep request and fetch option normalization free of caller-visible mutation
 - Keep non-object headers from leaking into normalized request options
 - Keep the header injection guard around caller-provided header names and values
