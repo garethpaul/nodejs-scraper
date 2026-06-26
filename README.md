@@ -76,6 +76,8 @@ no-network tests.
   reach the request client.
 - Caller-provided request and fetch option objects are not mutated while
   defaults are applied.
+- Run `node examples/reused-options.js` for a deterministic no-network example
+  that freezes and reuses the same request and fetch options across two calls.
 - Non-object headers are ignored during request option normalization, while the
   default `User-Agent` header is retained.
 - The header injection guard drops caller-provided header names or values that
@@ -100,6 +102,8 @@ no-network tests.
 - Missing or non-function callbacks are treated as no-ops.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.
+- `examples/reused-options.js` injects an in-memory response, so it is safe to
+  run without contacting `example.test` or any other service.
 - Example scripts import `../lib/scraper` so they can run from this checkout.
 - Use `reqPerSec` when issuing multiple external requests so callers do not
   overwhelm target services.

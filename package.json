@@ -7,7 +7,7 @@
   "directories" : { "lib" : "./lib" },
   "main" : "./lib/scraper.js",
   "scripts" : {
-    "test" : "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js",
+    "test" : "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js",
     "check" : "npm test && python3 scripts/check-baseline.py"
   },
   "repository" : { "type":"git", "url":"https://github.com/mape/node-scraper.git" },
