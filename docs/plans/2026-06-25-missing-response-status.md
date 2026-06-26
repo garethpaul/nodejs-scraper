@@ -35,5 +35,6 @@ callback path instead of throwing while formatting a status error.
 
 ## Merge Gate
 
-Hosted Node and CodeQL checks plus exact-head Codex review are required before
-merging the pull request.
+Implementation head `233fc0c` passed both hosted Node 20 baseline runs and
+CodeQL for Actions, JavaScript/TypeScript, and Python. Exact-head Codex review
+reported no actionable regressions.

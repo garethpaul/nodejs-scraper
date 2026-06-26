@@ -21,8 +21,11 @@
   `npm audit --omit=dev` all passed; the audit reported zero vulnerabilities.
 - Blockers: host Node 18.19.1 is below the repository's Node 20.19.0 contract,
   so behavior validation uses the official Node 20.19.0 image.
-- Next: require exact-head Codex review and hosted Node/CodeQL gates before
-  merging the pull request.
+- Hosted: implementation head `233fc0c` passed both Node 20 baseline runs and
+  CodeQL for Actions, JavaScript/TypeScript, and Python. Exact-head Codex review
+  reported no actionable regressions.
+- Next: revalidate this documentation-only head, merge PR #12, and synchronize
+  `master`.
 
 ## 2026-06-25T20:47:20Z — P1 security/correctness — cycle: unused responses
 
