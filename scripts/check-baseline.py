@@ -44,6 +44,8 @@ REQUIRED = [
     "docs/plans/2026-06-25-missing-response-status-design.md",
     "docs/plans/2026-06-25-missing-response-status.md",
     "docs/plans/2026-06-26-reusable-options-example.md",
+    "docs/plans/2026-06-26-changes-history-contract-design.md",
+    "docs/plans/2026-06-26-changes-history-contract.md",
     "docs/readme-overview.svg",
     "examples/reused-options.js",
     "lib/document.js",
@@ -55,6 +57,7 @@ REQUIRED = [
     "test/http-request.test.js",
     "test/scraper.test.js",
     "test/examples.test.js",
+    "test/test_baseline_contracts.py",
 ]
 
 
@@ -64,6 +67,13 @@ def markdown_section(text, heading):
         text,
     )
     return match.group(1).strip() if match else ""
+
+
+def changes_entry_containing(text, phrase):
+    for entry in re.split(r"(?m)^## ", text)[1:]:
+        if phrase in entry:
+            return entry
+    return ""
 
 
 def read(relative_path):
@@ -78,7 +88,7 @@ def main():
 
     package = json.loads(read("package.json"))
     scripts = package.get("scripts", {})
-    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js":
+    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js && python3 test/test_baseline_contracts.py":
         failures.append("package.json must expose npm test")
     if "scripts/check-baseline.py" not in scripts.get("check", ""):
         failures.append("package.json must expose npm run check")
@@ -772,16 +782,31 @@ def main():
         if expected not in reusable_options_verification:
             failures.append(f"reusable options example verification must record {expected}")
 
+    changes_history_plan = read("docs/plans/2026-06-26-changes-history-contract.md")
+    changes_history_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", changes_history_plan)
+    changes_history_verification = markdown_section(changes_history_plan, "Verification Completed")
+    if (changes_history_status != ["completed"] or not changes_history_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b", changes_history_verification)):
+        failures.append("changes history contract plan must record completed status and verification")
+    for expected in [
+        "python3 test/test_baseline_contracts.py",
+        "npm test",
+        "make check",
+        "external working directory",
+        "git diff --check",
+    ]:
+        if expected not in changes_history_verification:
+            failures.append(f"changes history contract verification must record {expected}")
+
     changes = read("CHANGES.md")
-    change_entries = re.split(r"(?m)^## ", changes)
-    latest_changes = change_entries[1] if len(change_entries) > 1 else ""
+    reusable_options_changes = changes_entry_containing(changes, "cycle: reusable option inputs")
     for expected in [
         "reusable-options example",
         "examples/reused-options.js",
         "test/examples.test.js",
         "hostile mutations",
     ]:
-        if expected not in latest_changes:
+        if expected not in reusable_options_changes:
             failures.append(f"changes must record reusable options evidence: {expected}")
 
     vision = read("VISION.md")

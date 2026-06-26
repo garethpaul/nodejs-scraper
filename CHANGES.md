@@ -1,5 +1,65 @@
 # Changes
 
+## 2026-06-26 13:20 PDT - P2 - Preserve historical change evidence
+
+### Summary
+
+Fixed the static verifier so a completed feature's evidence remains checked
+without requiring that feature entry to stay permanently newest in `CHANGES.md`.
+
+### Work completed
+
+- Added entry lookup by stable content instead of binding reusable-options
+  evidence to the first change entry.
+- Added a dependency-free Python regression with a newer audit entry before the
+  historical reusable-options record.
+- Registered the regression in `npm test` and the baseline file inventory.
+
+### Threads
+
+- Started: none; the verifier defect was handled directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `scripts/check-baseline.py` — locate the matching historical evidence entry.
+- `test/test_baseline_contracts.py` and `package.json` — add and register the
+  future-entry regression.
+- Plan files — record design, TDD evidence, and validation.
+- `CHANGES.md` — record this maintenance cycle.
+
+### Validation
+
+- Red-first regression failed because `changes_entry_containing` did not exist.
+- The focused Python regression and Node 20.19.0 `npm test` passed after the
+  helper and verifier integration were implemented.
+- All five Make aliases passed from both the repository root and an external
+  working directory under Node 20.19.0; checks included the JavaScript suite,
+  historical-entry regression, static baseline, and six Make authority tests.
+- The host Node 18.19.1 run failed on the documented unsupported jsdom engine;
+  an ephemeral Node 20.19.0 runtime passed the authoritative tests.
+- `npm audit --omit=dev` reported zero production vulnerabilities.
+
+### Bugs / findings
+
+- P2 maintenance correctness: the verifier's newest-entry assumption prevented
+  legitimate future `CHANGES.md` records unless they duplicated old feature
+  evidence.
+- The first audit-entry patch attempt used a stale expected heading and made no
+  file change; subsequent validation correctly continued against the original
+  history before this contract fix.
+
+### Blockers
+
+- The system Node executable is below the maintained engine; local validation
+  must select Node 20.19.0 or newer explicitly.
+
+### Next action
+
+- Complete final audits, hosted checks, and exact-head review, then merge only
+  the unchanged green PR head.
+
 ## 2026-06-26T11:43:53Z — P2 usability/correctness — cycle: reusable option inputs
 
 - Threads: confirmed the default branch was current and clean, found no open
