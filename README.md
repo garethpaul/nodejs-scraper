@@ -149,9 +149,10 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Review changes touching network requests, sockets, or service endpoints; examples from the scan include examples/advanced.js, examples/parallel.js, examples/simple.js, examples/test.js, and 1 more.
 - Tests should avoid external requests by injecting fake transport/document
   dependencies. Network errors should be surfaced to callbacks without reading
-  missing response bodies, non-function callbacks should not throw during async
-  completion, non-object headers should not create numeric header names, and
-  option defaults should not mutate caller inputs. HTTP(S) URI validation should
+  missing response bodies, absent response metadata should report an unknown
+  status through the callback, non-function callbacks should not throw during
+  async completion, non-object headers should not create numeric header names,
+  and option defaults should not mutate caller inputs. HTTP(S) URI validation should
   reject non-web schemes, missing HTTP(S) hosts, and HTTP(S) URI credentials
   before request dispatch.
 - The response body parse limit bounds content entering jsdom, and the
@@ -183,6 +184,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
   and `package-lock.json` synchronized through `npm ci`.
 - See `docs/plans/2026-06-12-maintained-parser-lockfile.md` for the maintained
   parser and reproducible dependency migration.
+- See `docs/plans/2026-06-25-missing-response-status-design.md` and
+  `docs/plans/2026-06-25-missing-response-status.md` for null-safe transport
+  response diagnostics.
 - See `VISION.md` for project direction and contribution guardrails.
 
 ## Contributing

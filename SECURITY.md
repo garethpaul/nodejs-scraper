@@ -41,6 +41,8 @@ For this scraper, also review whether external requests respect target terms,
 robots guidance, and caller-provided rate limits. Tests should inject fake
 request clients instead of contacting live sites, and network errors should
 reach callbacks without exposing or logging captured page content.
+Missing transport response metadata should remain on the callback error path
+with an unknown status instead of throwing while formatting diagnostics.
 Non-positive `reqPerSec` values should not stall queued requests.
 Positive `reqPerSec` values should bound request starts rather than scheduling
 new work from remote response completion; slow responses may overlap, but they

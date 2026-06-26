@@ -41,6 +41,8 @@ REQUIRED = [
     "docs/plans/2026-06-16-ipv6-global-unicast-boundary.md",
     "docs/plans/2026-06-18-undici-advisory-refresh.md",
     "docs/plans/2026-06-21-spaced-makefile-path.md",
+    "docs/plans/2026-06-25-missing-response-status-design.md",
+    "docs/plans/2026-06-25-missing-response-status.md",
     "docs/readme-overview.svg",
     "lib/document.js",
     "lib/http-request.js",
@@ -184,6 +186,7 @@ def main():
         "Buffer.byteLength(body, 'utf8')",
         "Response body must be text or a buffer.",
         "Response body exceeds maxBodyBytes limit",
+        "var statusCode = response && response.statusCode != null ? response.statusCode : 'unknown';",
         "return;",
     ]:
         if phrase not in source:
@@ -262,6 +265,9 @@ def main():
         "rejects http request uri with credentials without calling request",
         "handles request errors",
         "handles non-200 responses",
+        "reports missing response metadata through the callback",
+        "ended with status code: unknown",
+        "assert.equal(callbackCount, 1)",
         "does not skip queued requests",
         "does not stall queued requests for non-positive reqPerSec",
         "spaces integer reqPerSec request starts without waiting for completion",
@@ -695,6 +701,24 @@ def main():
     ]:
         if expected not in undici_verification:
             failures.append(f"undici advisory verification must record {expected}")
+
+    missing_response_plan = read("docs/plans/2026-06-25-missing-response-status.md")
+    missing_response_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", missing_response_plan)
+    missing_response_verification = markdown_section(missing_response_plan, "Verification Completed")
+    if (missing_response_status != ["completed"] or not missing_response_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b", missing_response_verification)):
+        failures.append("missing response status plan must record completed status and verification")
+    for expected in [
+        "node test/scraper.test.js",
+        "npm test",
+        "npm audit --omit=dev",
+        "make check",
+        "external working directory",
+        "hostile mutations",
+        "git diff --check",
+    ]:
+        if expected not in missing_response_verification:
+            failures.append(f"missing response status verification must record {expected}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

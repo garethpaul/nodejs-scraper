@@ -419,6 +419,31 @@ test('handles non-200 responses without reading body', function(done) {
 	});
 });
 
+test('reports missing response metadata through the callback', function(done) {
+	var parserCalled = false;
+	var callbackCount = 0;
+	var scraper = scraperWithRequest(function(options, callback) {
+		process.nextTick(function() {
+			callback(null, null, null);
+		});
+	}, function() {
+		parserCalled = true;
+	});
+
+	scraper('https://example.com/missing-response', function(err, $, body) {
+		callbackCount += 1;
+		assert(err);
+		assert.equal(err.message, 'Request to https://example.com/missing-response ended with status code: unknown');
+		assert.equal($, null);
+		assert.equal(body, null);
+		assert.equal(parserCalled, false);
+		process.nextTick(function() {
+			assert.equal(callbackCount, 1);
+			done();
+		});
+	});
+});
+
 test('does not skip queued requests', function(done) {
 	var calledUris = [];
 	var callbackCount = 0;
