@@ -30,6 +30,7 @@ Priority:
 - Keep no-network tests for request options and network errors
 - Keep absent transport response metadata on the callback error path
 - Keep request and fetch option normalization free of caller-visible mutation
+- Keep the no-network reusable-options example executable in the test suite
 - Keep non-object headers from leaking into normalized request options
 - Keep the header injection guard around caller-provided header names and values
 - Keep examples bounded and runnable from the repository checkout
@@ -55,7 +56,6 @@ Priority:
 Next priorities:
 
 - Keep maintenance and verification on Node 20.19.0+ for jsdom compatibility
-- Add clearer examples for non-mutating option reuse
 - Add broader parser compatibility fixtures as real usage requires them
 - Clarify robots, terms, and rate-limit expectations for users
 

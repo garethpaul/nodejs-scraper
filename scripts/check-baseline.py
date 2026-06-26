@@ -43,7 +43,9 @@ REQUIRED = [
     "docs/plans/2026-06-21-spaced-makefile-path.md",
     "docs/plans/2026-06-25-missing-response-status-design.md",
     "docs/plans/2026-06-25-missing-response-status.md",
+    "docs/plans/2026-06-26-reusable-options-example.md",
     "docs/readme-overview.svg",
+    "examples/reused-options.js",
     "lib/document.js",
     "lib/http-request.js",
     "lib/scraper.js",
@@ -52,6 +54,7 @@ REQUIRED = [
     "test/document.test.js",
     "test/http-request.test.js",
     "test/scraper.test.js",
+    "test/examples.test.js",
 ]
 
 
@@ -75,7 +78,7 @@ def main():
 
     package = json.loads(read("package.json"))
     scripts = package.get("scripts", {})
-    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js":
+    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js":
         failures.append("package.json must expose npm test")
     if "scripts/check-baseline.py" not in scripts.get("check", ""):
         failures.append("package.json must expose npm run check")
@@ -366,6 +369,33 @@ def main():
     local_example = read("examples/test.js")
     if "SCRAPER_TEST_REQUESTS" not in local_example or "server.close()" not in local_example:
         failures.append("examples/test.js must bound local load and close its server")
+
+    reusable_example = read("examples/reused-options.js")
+    for expected in [
+        "createScraper",
+        "Object.freeze",
+        "First scrape",
+        "Second scrape",
+        "Request options unchanged",
+        "Fetch options unchanged",
+    ]:
+        if expected not in reusable_example:
+            failures.append(f"reusable options example must include {expected}")
+
+    example_tests = read("test/examples.test.js")
+    for expected in [
+        "examples', 'reused-options.js",
+        "First scrape: Example One",
+        "Second scrape: Example Two",
+        "Request options unchanged: true",
+        "Fetch options unchanged: true",
+    ]:
+        if expected not in example_tests:
+            failures.append(f"example regression must include {expected}")
+
+    readme = read("README.md")
+    if "node examples/reused-options.js" not in readme or "deterministic no-network example" not in readme:
+        failures.append("README must document the deterministic reusable-options example")
 
     gitignore = read(".gitignore")
     for expected in ["node_modules/", "npm-debug.log", "__pycache__/", "*.py[cod]", ".env"]:
@@ -719,6 +749,46 @@ def main():
     ]:
         if expected not in missing_response_verification:
             failures.append(f"missing response status verification must record {expected}")
+
+    reusable_options_plan = read("docs/plans/2026-06-26-reusable-options-example.md")
+    reusable_options_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", reusable_options_plan)
+    reusable_options_verification = markdown_section(reusable_options_plan, "Verification Completed")
+    if (reusable_options_status != ["completed"] or not reusable_options_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b", reusable_options_verification)):
+        failures.append("reusable options example plan must record completed status and verification")
+    for expected in [
+        "node test/examples.test.js",
+        "npm test",
+        "npm run check",
+        "npm audit --omit=dev",
+        "make lint",
+        "make test",
+        "make build",
+        "make check",
+        "external working directory",
+        "hostile mutations",
+        "git diff --check",
+    ]:
+        if expected not in reusable_options_verification:
+            failures.append(f"reusable options example verification must record {expected}")
+
+    changes = read("CHANGES.md")
+    change_entries = re.split(r"(?m)^## ", changes)
+    latest_changes = change_entries[1] if len(change_entries) > 1 else ""
+    for expected in [
+        "reusable-options example",
+        "examples/reused-options.js",
+        "test/examples.test.js",
+        "hostile mutations",
+    ]:
+        if expected not in latest_changes:
+            failures.append(f"changes must record reusable options evidence: {expected}")
+
+    vision = read("VISION.md")
+    if "Keep the no-network reusable-options example executable in the test suite" not in vision:
+        failures.append("vision must preserve the reusable-options example contract")
+    if "Add clearer examples for non-mutating option reuse" in vision:
+        failures.append("vision must retire the completed reusable-options priority")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

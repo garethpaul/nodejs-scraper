@@ -1,5 +1,29 @@
 # Changes
 
+## 2026-06-26T11:43:53Z — P2 usability/correctness — cycle: reusable option inputs
+
+- Threads: confirmed the default branch was current and clean, found no open
+  pull requests or issues, and selected the explicit roadmap gap for a clearer
+  non-mutating option-reuse example.
+- Example: added the reusable-options example at `examples/reused-options.js`,
+  a deterministic no-network program that injects two in-memory responses,
+  freezes one request-options
+  object and one fetch-options object, reuses both across two scraper calls,
+  and prints the unchanged-input result.
+- Tests: added `test/examples.test.js` and wired it into `npm test`; the
+  child-process regression requires both parsed titles, a clean exit, empty
+  stderr, and both immutability confirmations.
+- Documentation: linked the runnable command from `README.md`, distinguished
+  the offline example from external placeholders, promoted the example to a
+  maintained `VISION.md` invariant, and retired the completed roadmap item.
+- Contracts: the baseline requires the example, executable regression, npm
+  wiring, README guidance, completed plan, current vision invariant, latest
+  cycle evidence, and focused hostile mutations.
+- Validation: Node 20.19.0 ran the example, focused regression, complete npm
+  suite, production audit, and Make test gate; the exact lockfile reported zero
+  vulnerabilities. Final repository/external Make aliases and mutation results
+  are recorded in the completed implementation plan.
+
 ## 2026-06-26T01:04:22Z — P2 correctness — cycle: missing response metadata
 
 - Threads: selected the next explicitly licensed stale repository, confirmed
