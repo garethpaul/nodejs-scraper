@@ -7,7 +7,7 @@
   "directories" : { "lib" : "./lib" },
   "main" : "./lib/scraper.js",
   "scripts" : {
-    "test" : "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js && python3 test/test_baseline_contracts.py",
+    "test" : "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js && python3 test/test_baseline_contracts.py && python3 test/test_ietf_protocol_address_contract.py",
     "check" : "npm test && python3 scripts/check-baseline.py"
   },
   "repository" : { "type":"git", "url":"https://github.com/mape/node-scraper.git" },

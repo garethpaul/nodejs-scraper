@@ -46,6 +46,7 @@ REQUIRED = [
     "docs/plans/2026-06-26-reusable-options-example.md",
     "docs/plans/2026-06-26-changes-history-contract-design.md",
     "docs/plans/2026-06-26-changes-history-contract.md",
+    "docs/plans/2026-06-26-ietf-protocol-address-boundary.md",
     "docs/readme-overview.svg",
     "examples/reused-options.js",
     "lib/document.js",
@@ -53,8 +54,10 @@ REQUIRED = [
     "lib/scraper.js",
     "package.json",
     "package-lock.json",
+    "scripts/ietf_protocol_address_contract.py",
     "test/document.test.js",
     "test/http-request.test.js",
+    "test/test_ietf_protocol_address_contract.py",
     "test/scraper.test.js",
     "test/examples.test.js",
     "test/test_baseline_contracts.py",
@@ -88,7 +91,7 @@ def main():
 
     package = json.loads(read("package.json"))
     scripts = package.get("scripts", {})
-    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js && python3 test/test_baseline_contracts.py":
+    if scripts.get("test") != "node test/scraper.test.js && node test/http-request.test.js && node test/document.test.js && node test/examples.test.js && python3 test/test_baseline_contracts.py && python3 test/test_ietf_protocol_address_contract.py":
         failures.append("package.json must expose npm test")
     if "scripts/check-baseline.py" not in scripts.get("check", ""):
         failures.append("package.json must expose npm run check")
@@ -171,10 +174,10 @@ def main():
         "function normalizeMaxBodyBytes",
         "function normalizeResponseBody",
         "function isHttpUri",
-        "require('url')",
-        "url.parse(uri)",
+        "parsed = new URL(uri)",
         "parsed.hostname",
-        "parsed.auth",
+        "parsed.username",
+        "parsed.password",
         "module.exports.createScraper",
         "module.exports.normalizeRequestOptions",
         "normalizedFetchOptions",
@@ -313,6 +316,11 @@ def main():
     transport_tests = read("test/http-request.test.js")
     for phrase in [
         "classifies public and blocked IP addresses",
+        "rejects unassigned IETF protocol literals before dispatch",
+        "rejects DNS answers in unassigned IETF protocol space",
+        "rejects redirects to unassigned IETF protocol space",
+        "assert.equal(transport.isPublicAddress('192.0.0.9'), true)",
+        "assert.equal(transport.isPublicAddress('192.0.0.10'), true)",
         "rejects bracketed private IPv6 literals before dispatch",
         "rejects reserved IPv6 literals outside global unicast before dispatch",
         "rejects DNS answers outside IPv6 global unicast",
@@ -334,6 +342,10 @@ def main():
             failures.append(f"transport tests must include {phrase}")
 
     for path, phrase in [
+        ("README.md", "IETF protocol-assignment `192.0.0.0/24`"),
+        ("SECURITY.md", "192.0.0.9` and `192.0.0.10"),
+        ("VISION.md", "IETF protocol-assignment IPv4 space"),
+        ("AGENTS.md", "IETF protocol-assignment `192.0.0.0/24` boundary"),
         ("README.md", "`2000::/3` global-unicast space"),
         ("SECURITY.md", "Future IANA allocation changes require an intentional classifier"),
         ("VISION.md", "currently allocated IPv6 `2000::/3` global-unicast space"),
@@ -716,6 +728,19 @@ def main():
     ]:
         if expected not in ipv6_verification:
             failures.append(f"IPv6 global-unicast verification must record {expected}")
+
+    ietf_ipv4_plan = read("docs/plans/2026-06-26-ietf-protocol-address-boundary.md")
+    if not all(value in ietf_ipv4_plan for value in [
+        "status: completed",
+        "192.0.0.0/24",
+        "192.0.0.9",
+        "192.0.0.10",
+        "WHATWG URL",
+        "Eight isolated hostile mutations",
+        "npm test",
+        "make check",
+    ]):
+        failures.append("IETF protocol-address plan must record completed implementation and verification")
 
     undici_plan = read("docs/plans/2026-06-18-undici-advisory-refresh.md")
     undici_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", undici_plan)

@@ -1,5 +1,57 @@
 # Changes
 
+## 2026-06-26 20:55 PDT - P1 - Close IETF protocol-address SSRF gap
+
+### Summary
+
+Blocked unassigned addresses in the IETF protocol-assignment
+`192.0.0.0/24` range while preserving only the two globally reachable IANA
+anycast assignments, and replaced legacy URI preflight parsing with WHATWG URL
+semantics.
+
+### Work completed
+
+- Expanded the IPv4 special-purpose classifier from fragmentary entries to the
+  complete non-global `/24` boundary.
+- Preserved `192.0.0.9` and `192.0.0.10` as explicit globally reachable
+  exceptions.
+- Added no-network literal, DNS, redirect, and positive-exception coverage.
+- Replaced deprecated `url.parse()` preflight with `new URL()` to match the
+  built-in transport's parser.
+- Added an eight-mutation focused source and test contract.
+
+### Validation
+
+- RED: `192.0.0.11` was classified as public before the repair.
+- GREEN: the HTTP transport suite, full package tests, package baseline, and
+  eight-mutation focused contract pass.
+- Repository and external-root `make check` pass the JavaScript/Python suite,
+  baseline, focused mutations, and all six Make authority tests on Node 24.
+- `npm audit --omit=dev` reports zero vulnerabilities; Python compilation and
+  `git diff --check` pass.
+- IANA's current IPv4 Special-Purpose Address Registry confirms the parent
+  `/24` is non-global and only `.9` and `.10` are globally reachable.
+- Hosted Node 20 validation, CodeQL, and exact-head review remain required
+  before merge.
+
+### Bugs / findings
+
+- P1 SSRF boundary: most of `192.0.0.0/24` is not globally reachable, but the
+  transport blocked only `/29` plus three individual addresses, allowing
+  unassigned protocol-space literals or DNS answers to dispatch.
+- P2 compatibility/security: Node 24 emitted its `url.parse()` security
+  deprecation during examples, causing the full package test to fail.
+
+### Blockers
+
+- No live external request is needed or permitted for this deterministic
+  address-classification repair.
+
+### Next action
+
+- Run every local gate, then require hosted Node matrices, CodeQL, and
+  exact-head review before merging.
+
 ## 2026-06-26 13:20 PDT - P2 - Preserve historical change evidence
 
 ### Summary
