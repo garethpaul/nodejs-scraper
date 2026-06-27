@@ -96,9 +96,13 @@ no-network tests.
   4.0.0 `$` function. Remote page scripts and subresources are not enabled.
 - The built-in transport follows at most five redirects by default, validates
   every redirect target, restricts IPv6 destinations to the currently allocated
-  `2000::/3` global-unicast space, rejects private network and special-purpose
-  IP destinations, and strips credential-bearing headers when a redirect
-  crosses origins.
+  `2000::/3` global-unicast space, blocks IETF protocol-assignment `192.0.0.0/24`
+  except its globally reachable `.9` and
+  `.10` anycast addresses, rejects other private or special-purpose IP
+  destinations, and strips credential-bearing headers when a redirect crosses
+  origins.
+- URI preflight and transport dispatch both use WHATWG URL parsing so modern
+  Node releases apply one unambiguous HTTP(S), host, and credential boundary.
 - Missing or non-function callbacks are treated as no-ops.
 - The checked-in external examples use reserved `example.test` URLs; replace
   them with targets you own or have permission to test.

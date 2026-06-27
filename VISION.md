@@ -43,6 +43,8 @@ Priority:
 - Keep request URI dispatch limited to HTTP(S) schemes
 - Keep HTTP(S) hosts required before request dispatch
 - Keep HTTP(S) URI credentials rejected before request dispatch
+- Keep IETF protocol-assignment IPv4 space blocked except for explicitly
+  globally reachable IANA assignments
 - Keep outbound requests on a 10-second timeout by default while preserving
   finite positive caller overrides and one total request deadline across
   redirects
@@ -70,6 +72,8 @@ Contribution rules:
 - Preserve HTTP(S) URI validation when changing request dispatch.
 - Preserve HTTP(S) host validation when changing request dispatch.
 - Preserve HTTP(S) URI credentials rejection when changing request dispatch.
+- Preserve the IETF protocol-assignment IPv4 exception model when changing the
+  public-address classifier.
 - Preserve the bounded request timeout when changing request normalization.
 - Preserve the response body parse limit when changing scraper parsing.
 - Preserve disabled script/resource loading and the jQuery-compatible callback

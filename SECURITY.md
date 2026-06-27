@@ -76,6 +76,11 @@ translation-prefix destinations after DNS resolution and on every bounded
 redirect. Future IANA allocation changes require an intentional classifier and
 regression-test update. Cross-origin redirects must not forward authorization,
 cookie, or proxy authorization headers.
+The IETF protocol-assignment IPv4 block `192.0.0.0/24` is non-global except
+for the explicitly assigned globally reachable anycast addresses `192.0.0.9` and `192.0.0.10`;
+literals, DNS results, and redirects must preserve that
+exception model. URI preflight should use WHATWG URL parsing rather than the
+deprecated legacy parser.
 The checked-in examples use reserved `example.test` URLs so casual test runs do
 not send traffic to retired third-party endpoints.
 

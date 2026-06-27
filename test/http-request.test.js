@@ -106,17 +106,67 @@ function fakeClient(responses, requests, options) {
 test('classifies public and blocked IP addresses', function(done) {
 	assert.equal(transport.isPublicAddress('93.184.216.34'), true);
 	assert.equal(transport.isPublicAddress('192.0.0.9'), true);
+	assert.equal(transport.isPublicAddress('192.0.0.10'), true);
 	assert.equal(transport.isPublicAddress('2606:2800:220:1:248:1893:25c8:1946'), true);
 	assert.equal(transport.isPublicAddress('2001:3::1'), true);
 	[
 		'127.0.0.1', '10.0.0.1', '169.254.1.1', '192.168.1.1',
-		'192.0.0.8', '192.0.2.1', '224.0.0.1', '::1', 'fc00::1',
+		'192.0.0.8', '192.0.0.11', '192.0.0.200', '192.0.2.1', '224.0.0.1', '::1', 'fc00::1',
 		'fe80::1', '2001:2::1', '2001:db8::1', '3fff::1',
 		'4000::1', '::ffff:127.0.0.1', '64:ff9b::7f00:1'
 	].forEach(function(address) {
 		assert.equal(transport.isPublicAddress(address), false, address);
 	});
 	done();
+});
+
+test('rejects unassigned IETF protocol literals before dispatch', function(done) {
+	var requests = [];
+	var client = fakeClient([], requests);
+	var request = transport.createHttpRequest({ http: client, https: client });
+
+	request({ uri: 'https://192.0.0.11/admin', timeout: 1000 }, function(err) {
+		assert(err);
+		assert(err.message.indexOf('public network address') !== -1);
+		assert.equal(requests.length, 0);
+		done();
+	}, { maxBodyBytes: 1024 });
+});
+
+test('rejects DNS answers in unassigned IETF protocol space', function(done) {
+	var requests = [];
+	var client = fakeClient([], requests);
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['192.0.0.200'])
+	});
+
+	request({ uri: 'https://reserved.example', timeout: 1000 }, function(err) {
+		assert(err);
+		assert(err.message.indexOf('public network address') !== -1);
+		assert.equal(requests.length, 1);
+		done();
+	}, { maxBodyBytes: 1024 });
+});
+
+test('rejects redirects to unassigned IETF protocol space', function(done) {
+	var requests = [];
+	var client = fakeClient([
+		{ statusCode: 302, headers: { location: 'https://192.0.0.200/admin' } }
+	], requests);
+	var request = transport.createHttpRequest({
+		http: client,
+		https: client,
+		lookup: fakeDns(['93.184.216.34'])
+	});
+
+	request({ uri: 'https://public.example', timeout: 1000 }, function(err) {
+		assert(err);
+		assert(err.message.indexOf('public network address') !== -1);
+		assert.equal(requests.length, 1);
+		done();
+	}, { maxBodyBytes: 1024 });
 });
 
 test('rejects reserved IPv6 literals outside global unicast before dispatch', function(done) {
